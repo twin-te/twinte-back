@@ -30,6 +30,9 @@ go run . serve
 ## API
 [connect](https://connectrpc.com/docs/introduction)を使用しています。
 
+1. `twinte-proto`配下にAPIの定義を記述する
+2. `make buf-gen`を実行することでprotocol bufftersからGoのコードを生成する
+
 ## idtype
 コード生成のためPythonが必要になります。Python 3.9では動きました。
 
