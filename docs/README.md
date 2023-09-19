@@ -44,3 +44,6 @@ python codegen/idtype/generate.py
 <img width="758" alt="twinte_arch" src="https://github.com/twin-te/twinte-back/assets/68944024/7cf0cdd7-222d-489c-89a8-89c4514a29f7">
 
 DDD・Clean Architecture・Modular Monolithを参考にして作成しました。
+
+## OAuth2
+googleのOAuth2に関する設定ファイル(gcpのconsoleから取得できるoauth2のjsonファイル)は`module/auth/gateway/google_client_credentials.json`に配置して下さい。
