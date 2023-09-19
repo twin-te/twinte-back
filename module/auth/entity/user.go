@@ -14,6 +14,7 @@ const (
 	ProviderTwitter
 )
 
+// SocialID represents provider's user id
 type SocialID string
 
 func (sid SocialID) String() string {
