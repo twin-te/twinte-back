@@ -1,0 +1,39 @@
+syntax="proto3";
+package api.v4;
+option go_package = "github.com/twin-te/twinte-back/api/gen;apigen";
+
+service AuthService {
+  // authenticated user
+  rpc GetMe(GetMeRequest) returns (GetMeResponse);
+  rpc DeleteAccount(DeleteAccountRequest) returns (DeleteAccountResponse);
+  rpc DeleteAuthentication(DeleteAuthenticationRequest) returns (DeleteAuthenticationResponse);
+}
+
+enum Provider {
+  PROVIDER_UNKNOWN = 0;
+  PROVIDER_GOOGLE = 1;
+  PROVIDER_TWITTER = 2;
+  PROVIDER_APPLE = 3;
+}
+
+message Authentication {
+  Provider provider = 1;
+  string socialID = 2;
+}
+
+message GetMeRequest {}
+
+message GetMeResponse {
+  string id = 1;
+  repeated Authentication authentications = 2;
+}
+
+message DeleteAccountRequest {}
+
+message DeleteAccountResponse {}
+
+message DeleteAuthenticationRequest {
+  Provider provider = 1;
+}
+
+message DeleteAuthenticationResponse {}

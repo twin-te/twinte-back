@@ -1,3 +1,5 @@
+include .env
+
 up:
 	docker compose up -d
 
@@ -25,19 +27,22 @@ tidy:
 test:
 	go test -count=1 ./...
 
+buf-gen:
+	rm -rf ./api/gen && buf generate ./twinte-proto
+
 # ex.) make migrate-create name=foo
 migrate-create:
 	migrate create -dir ./db/migrations -ext sql -seq -digits 6 ${name}
 
 migrate-up:
-	migrate -database postgres://postgres:password@db:5432/twinte-db?sslmode=disable -path ./db/migrations up
+	migrate -database $(DB_URL) -path ./db/migrations up
 
 migrate-down:
-	migrate -database postgres://postgres:password@db:5432/twinte-db?sslmode=disable -path ./db/migrations down -all
+	migrate -database $(DB_URL) -path ./db/migrations down -all
 
 # ex.) make migrate-force version=1
 migrate-force:
-	migrate -database postgres://postgres:password@db:5432/twinte-db?sslmode=disable -path ./db/migrations force ${version}
+	migrate -database $(DB_URL) -path ./db/migrations force ${version}
 
 sqlboiler:
 	sqlboiler psql -c sqlboiler.toml

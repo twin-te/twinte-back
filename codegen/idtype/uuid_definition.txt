@@ -1,0 +1,5 @@
+CourseID
+RegisteredCourseID
+SessionID
+TagID
+UserID

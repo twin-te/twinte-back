@@ -12,6 +12,7 @@ RUN curl -L https://github.com/golang-migrate/migrate/releases/download/v4.15.2/
   && go install github.com/fullstorydev/grpcurl/cmd/grpcurl@latest \
   && go install google.golang.org/protobuf/cmd/protoc-gen-go@latest \
   && go install github.com/bufbuild/connect-go/cmd/protoc-gen-connect-go@latest \
+  && go install github.com/spf13/cobra-cli@latest \
   && go install golang.org/x/tools/gopls@latest
 
 COPY go.mod go.sum ./
