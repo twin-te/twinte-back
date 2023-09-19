@@ -3,6 +3,7 @@ module github.com/twin-te/twinte-back
 go 1.20
 
 require (
+	connectrpc.com/connect v1.11.1
 	github.com/bufbuild/connect-go v1.10.0
 	github.com/friendsofgo/errors v0.9.2
 	github.com/google/uuid v1.3.0

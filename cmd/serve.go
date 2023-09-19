@@ -5,7 +5,9 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/bufbuild/connect-go"
 	"github.com/twin-te/twinte-back/api/gen/apigenconnect"
+	apiinterceptor "github.com/twin-te/twinte-back/api/interceptor"
 	apioauth2 "github.com/twin-te/twinte-back/api/oauth2"
 	apiservice "github.com/twin-te/twinte-back/api/service"
 	authgateway "github.com/twin-te/twinte-back/module/auth/gateway"
@@ -34,13 +36,15 @@ var serveCmd = &cobra.Command{
 
 		apiOAuth2Handler := apioauth2.NewHandler(authUseCase)
 
+		intercepters := connect.WithInterceptors(apiinterceptor.NewAuthInterceptor(authUseCase))
+
 		mux := http.NewServeMux()
 
 		mux.HandleFunc("/oauth2/logout", apiOAuth2Handler.HandleLogout)
 		mux.HandleFunc("/oauth2/callback/", apiOAuth2Handler.HandleCallback)
 		mux.HandleFunc("/oauth2/", apiOAuth2Handler.Handle)
 
-		mux.Handle(apigenconnect.NewAuthServiceHandler(authAPIService))
+		mux.Handle(apigenconnect.NewAuthServiceHandler(authAPIService, intercepters))
 
 		http.ListenAndServe(
 			":8080",
