@@ -70,7 +70,7 @@ func (h *Handler) HandleCallback(w http.ResponseWriter, r *http.Request) {
 	queryState := r.URL.Query().Get("state")
 
 	if cookieState == "" || queryState == "" || cookieState != queryState {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		http.Error(w, "invalid oauth2 state", http.StatusInternalServerError)
 		return
 	}
 
