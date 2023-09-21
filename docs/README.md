@@ -12,7 +12,7 @@ make bash
 make migrate-up
 
 # サーバーを起動する
-go run . serve
+make serve
 ```
 
 ## DB
@@ -49,4 +49,4 @@ python codegen/idtype/generate.py
 DDD・Clean Architecture・Modular Monolithを参考にして作成しました。
 
 ## OAuth2
-googleのOAuth2に関する設定ファイル(gcpのconsoleから取得できるoauth2のjsonファイル)は`module/auth/gateway/google_client_credentials.json`に配置して下さい。
+OAuth2に関する設定は環境変数から行なっています。詳細は`.env`ファイルを参照して下さい。

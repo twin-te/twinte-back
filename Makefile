@@ -27,6 +27,9 @@ tidy:
 test:
 	go test -count=1 ./...
 
+serve:
+	go run . serve
+
 buf-gen:
 	rm -rf ./api/gen && buf generate ./twinte-proto
 
