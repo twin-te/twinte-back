@@ -4,6 +4,7 @@ import (
 	"context"
 	_ "embed"
 
+	"github.com/twin-te/twinte-back/appenv"
 	authentity "github.com/twin-te/twinte-back/module/auth/entity"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
@@ -11,17 +12,12 @@ import (
 	"google.golang.org/api/option"
 )
 
-//go:embed google_client_credentials.json
-var googleClientCredentials []byte
-
-var googleOAuth2Config *oauth2.Config
-
-func init() {
-	var err error
-	googleOAuth2Config, err = google.ConfigFromJSON(googleClientCredentials, googleapioauth2.OpenIDScope)
-	if err != nil {
-		panic(err)
-	}
+var googleOAuth2Config = &oauth2.Config{
+	ClientID:     appenv.OAUTH2_GOOGLE_CLIENT_ID,
+	ClientSecret: appenv.OAUTH2_GOOGLE_CLIENT_SECRET,
+	Endpoint:     google.Endpoint,
+	RedirectURL:  appenv.OAUTH2_GOOGLE_CALLBACK_URL,
+	Scopes:       []string{googleapioauth2.OpenIDScope},
 }
 
 func (uc *Impl) GetGoogleOAuth2ConsentPageURL(ctx context.Context, state authentity.OAuth2State) (url authentity.OAuth2ConsentPageURL, err error) {
