@@ -20,8 +20,14 @@ func (h *Handler) Handle(w http.ResponseWriter, r *http.Request) {
 	switch strings.TrimPrefix(r.URL.Path, "/oauth2/") {
 	case "google":
 		provider = authentity.ProviderGoogle
+	case "apple":
+		http.Error(w, "provider apple is not available", http.StatusNotImplemented)
+		return
+	case "twitter":
+		http.Error(w, "provider twitter is not available", http.StatusNotImplemented)
+		return
 	default:
-		http.Error(w, "invalid provider", http.StatusInternalServerError)
+		http.Error(w, "invalid provider", http.StatusBadRequest)
 		return
 	}
 
@@ -55,14 +61,20 @@ func (h *Handler) HandleCallback(w http.ResponseWriter, r *http.Request) {
 	switch strings.TrimPrefix(r.URL.Path, "/oauth2/callback/") {
 	case "google":
 		provider = authentity.ProviderGoogle
+	case "apple":
+		http.Error(w, "provider apple is not available", http.StatusNotImplemented)
+		return
+	case "twitter":
+		http.Error(w, "provider twitter is not available", http.StatusNotImplemented)
+		return
 	default:
-		http.Error(w, "invalid provider", http.StatusInternalServerError)
+		http.Error(w, "invalid provider", http.StatusBadRequest)
 		return
 	}
 
 	cookie, err := r.Cookie(appenv.COOKIE_OAUTH2_STATE_NAME)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		http.Error(w, "oauth2 state is not found in cookie", http.StatusBadRequest)
 		return
 	}
 
@@ -70,7 +82,7 @@ func (h *Handler) HandleCallback(w http.ResponseWriter, r *http.Request) {
 	queryState := r.URL.Query().Get("state")
 
 	if cookieState == "" || queryState == "" || cookieState != queryState {
-		http.Error(w, "invalid oauth2 state", http.StatusInternalServerError)
+		http.Error(w, "invalid oauth2 state", http.StatusBadRequest)
 		return
 	}
 
