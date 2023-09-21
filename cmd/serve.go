@@ -3,13 +3,13 @@ package cmd
 import (
 	"database/sql"
 	"net/http"
-	"os"
 
 	"github.com/bufbuild/connect-go"
 	"github.com/twin-te/twinte-back/api/gen/apigenconnect"
 	apiinterceptor "github.com/twin-te/twinte-back/api/interceptor"
 	apioauth2 "github.com/twin-te/twinte-back/api/oauth2"
 	apiservice "github.com/twin-te/twinte-back/api/service"
+	"github.com/twin-te/twinte-back/appenv"
 	authgateway "github.com/twin-te/twinte-back/module/auth/gateway"
 	authrepository "github.com/twin-te/twinte-back/module/auth/repository"
 	authusecase "github.com/twin-te/twinte-back/module/auth/usecase"
@@ -24,7 +24,7 @@ var serveCmd = &cobra.Command{
 	Use:   "serve",
 	Short: "serve the api server",
 	Run: func(cmd *cobra.Command, args []string) {
-		db, err := sql.Open("postgres", os.Getenv("DB_URL"))
+		db, err := sql.Open("postgres", appenv.DB_URL)
 		if err != nil {
 			panic(err)
 		}

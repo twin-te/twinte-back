@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/twin-te/twinte-back/appenv"
 	"github.com/twin-te/twinte-back/apperr"
 	authmodule "github.com/twin-te/twinte-back/module/auth"
 	authentity "github.com/twin-te/twinte-back/module/auth/entity"
@@ -37,10 +38,11 @@ func (h *Handler) Handle(w http.ResponseWriter, r *http.Request) {
 	}
 
 	http.SetCookie(w, &http.Cookie{
-		Name:     "twinte_oauth2_state",
+		Name:     appenv.COOKIE_OAUTH2_STATE_NAME,
 		Value:    state.String(),
 		Path:     "/",
 		MaxAge:   180,
+		Secure:   appenv.COOKIE_SECURE,
 		HttpOnly: true,
 		SameSite: http.SameSiteLaxMode,
 	})
@@ -58,7 +60,7 @@ func (h *Handler) HandleCallback(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	cookie, err := r.Cookie("twinte_oauth2_state")
+	cookie, err := r.Cookie(appenv.COOKIE_OAUTH2_STATE_NAME)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -90,21 +92,22 @@ func (h *Handler) HandleCallback(w http.ResponseWriter, r *http.Request) {
 	}
 
 	http.SetCookie(w, &http.Cookie{
-		Name:   "twinte_oauth2_state",
+		Name:   appenv.COOKIE_OAUTH2_STATE_NAME,
 		Path:   "/",
 		MaxAge: -1,
 	})
 
 	http.SetCookie(w, &http.Cookie{
-		Name:     "twinte_session",
+		Name:     appenv.COOKIE_SESSION_NAME,
 		Value:    session.ID.String(),
 		Path:     "/",
 		Expires:  session.ExpiredAt,
+		Secure:   appenv.COOKIE_SECURE,
 		HttpOnly: true,
 		SameSite: http.SameSiteLaxMode,
 	})
 
-	http.Redirect(w, r, "http://localhost:3000", http.StatusFound)
+	http.Redirect(w, r, appenv.OAUTH2_REDIRECT_URL, http.StatusFound)
 }
 
 func (h *Handler) HandleLogout(w http.ResponseWriter, r *http.Request) {
@@ -124,7 +127,7 @@ func (h *Handler) HandleLogout(w http.ResponseWriter, r *http.Request) {
 	}
 
 	http.SetCookie(w, &http.Cookie{
-		Name:   "twinte_session",
+		Name:   appenv.COOKIE_SESSION_NAME,
 		Path:   "/",
 		MaxAge: -1,
 	})

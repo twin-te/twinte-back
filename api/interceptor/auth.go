@@ -7,6 +7,7 @@ import (
 
 	"github.com/bufbuild/connect-go"
 	"github.com/twin-te/twinte-back/appctx"
+	"github.com/twin-te/twinte-back/appenv"
 	"github.com/twin-te/twinte-back/apperr"
 	"github.com/twin-te/twinte-back/idtype"
 	authmodule "github.com/twin-te/twinte-back/module/auth"
@@ -18,7 +19,7 @@ func NewAuthInterceptor(authUseCase authmodule.UseCase) connect.UnaryInterceptor
 			ctx context.Context,
 			req connect.AnyRequest,
 		) (connect.AnyResponse, error) {
-			cookie, err := (&http.Request{Header: req.Header()}).Cookie("twinte_session")
+			cookie, err := (&http.Request{Header: req.Header()}).Cookie(appenv.COOKIE_SESSION_NAME)
 			if err != nil {
 				return next(ctx, req)
 			}

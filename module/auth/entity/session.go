@@ -1,22 +1,16 @@
 package authentity
 
 import (
-	"fmt"
-	"os"
-	"strconv"
 	"time"
 
+	"github.com/twin-te/twinte-back/appenv"
 	"github.com/twin-te/twinte-back/idtype"
 )
 
 var SessionLifeTime time.Duration
 
 func init() {
-	days, err := strconv.ParseInt(os.Getenv("SESSION_LIFE_TIME_DAYS"), 10, 64)
-	if err != nil {
-		panic(fmt.Errorf("failed to parse environment variable SESSION_LIFE_TIME_DAYS %s", os.Getenv("SESSION_LIFE_TIME_DAYS")))
-	}
-	SessionLifeTime = time.Duration(days) * 24 * time.Hour
+	SessionLifeTime = time.Duration(appenv.SESSION_LIFE_TIME_DAYS) * 24 * time.Hour
 }
 
 type Session struct {
