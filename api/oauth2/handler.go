@@ -107,7 +107,7 @@ func (h *Handler) HandleCallback(w http.ResponseWriter, r *http.Request) {
 		SameSite: http.SameSiteLaxMode,
 	})
 
-	http.Redirect(w, r, appenv.OAUTH2_REDIRECT_URL, http.StatusFound)
+	http.Redirect(w, r, appenv.AUTH_REDIRECT_URL, http.StatusFound)
 }
 
 func (h *Handler) HandleLogout(w http.ResponseWriter, r *http.Request) {
@@ -131,7 +131,8 @@ func (h *Handler) HandleLogout(w http.ResponseWriter, r *http.Request) {
 		Path:   "/",
 		MaxAge: -1,
 	})
-	return
+
+	http.Redirect(w, r, appenv.AUTH_REDIRECT_URL, http.StatusFound)
 }
 
 func NewHandler(authUseCase authmodule.UseCase) *Handler {

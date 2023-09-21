@@ -14,8 +14,8 @@ var COOKIE_SESSION_NAME string
 var COOKIE_OAUTH2_STATE_NAME string
 var COOKIE_OAUTH2_STATE_MAX_AGE int
 
-// oauth2
-var OAUTH2_REDIRECT_URL string
+// auth
+var AUTH_REDIRECT_URL string
 
 // oauth2 google
 var OAUTH2_GOOGLE_CLIENT_ID string
@@ -35,8 +35,8 @@ func init() {
 	COOKIE_OAUTH2_STATE_NAME = os.Getenv("COOKIE_OAUTH2_STATE_NAME")
 	COOKIE_OAUTH2_STATE_MAX_AGE = must(strconv.Atoi(os.Getenv("COOKIE_OAUTH2_STATE_MAX_AGE")))
 
-	// oauth2
-	OAUTH2_REDIRECT_URL = os.Getenv("OAUTH2_REDIRECT_URL")
+	// auth
+	AUTH_REDIRECT_URL = os.Getenv("AUTH_REDIRECT_URL")
 
 	// oauth2 google
 	OAUTH2_GOOGLE_CLIENT_ID = os.Getenv("OAUTH2_GOOGLE_CLIENT_ID")

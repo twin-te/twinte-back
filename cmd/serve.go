@@ -34,15 +34,16 @@ var serveCmd = &cobra.Command{
 		authUseCase := authusecase.New(authGateway, authRepository)
 		authAPIService := apiservice.NewAuthService(authUseCase)
 
-		apiOAuth2Handler := apioauth2.NewHandler(authUseCase)
-
 		intercepters := connect.WithInterceptors(apiinterceptor.NewAuthInterceptor(authUseCase))
+
+		apiOAuth2Handler := apioauth2.NewHandler(authUseCase)
+		apiOAuth2AuthMiddleware := apioauth2.NewAuthMiddleware(authUseCase)
 
 		mux := http.NewServeMux()
 
-		mux.HandleFunc("/oauth2/logout", apiOAuth2Handler.HandleLogout)
-		mux.HandleFunc("/oauth2/callback/", apiOAuth2Handler.HandleCallback)
-		mux.HandleFunc("/oauth2/", apiOAuth2Handler.Handle)
+		mux.Handle("/oauth2/logout", apiOAuth2AuthMiddleware(http.HandlerFunc(apiOAuth2Handler.HandleLogout)))
+		mux.Handle("/oauth2/callback/", apiOAuth2AuthMiddleware(http.HandlerFunc(apiOAuth2Handler.HandleCallback)))
+		mux.Handle("/oauth2/", apiOAuth2AuthMiddleware(http.HandlerFunc(apiOAuth2Handler.Handle)))
 
 		mux.Handle(apigenconnect.NewAuthServiceHandler(authAPIService, intercepters))
 

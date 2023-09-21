@@ -104,7 +104,7 @@ func (r *Impl) FindUser(ctx context.Context, conds authport.FindUserConds) (*aut
 
 	mods = append(
 		mods,
-		dbmodel.UserWhere.DeletedAt.NEQ(null.NewTime(time.Time{}, false)),
+		dbmodel.UserWhere.DeletedAt.EQ(null.NewTime(time.Time{}, false)),
 		qm.Load(dbmodel.UserRels.UserAuthentications, authenticationMods...),
 	)
 
