@@ -19,12 +19,12 @@ func NewAuthInterceptor(authUseCase authmodule.UseCase) connect.UnaryInterceptor
 			req connect.AnyRequest,
 		) (connect.AnyResponse, error) {
 			cookie, err := (&http.Request{Header: req.Header()}).Cookie("twinte_session")
-			if err == nil {
+			if err != nil {
 				return next(ctx, req)
 			}
 
 			sessionID, err := idtype.NewSessionIDFromString(cookie.Value)
-			if err == nil {
+			if err != nil {
 				return next(ctx, req)
 			}
 
