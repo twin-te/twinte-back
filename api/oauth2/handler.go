@@ -41,7 +41,7 @@ func (h *Handler) Handle(w http.ResponseWriter, r *http.Request) {
 		Name:     appenv.COOKIE_OAUTH2_STATE_NAME,
 		Value:    state.String(),
 		Path:     "/",
-		MaxAge:   180,
+		MaxAge:   appenv.COOKIE_OAUTH2_STATE_MAX_AGE,
 		Secure:   appenv.COOKIE_SECURE,
 		HttpOnly: true,
 		SameSite: http.SameSiteLaxMode,

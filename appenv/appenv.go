@@ -12,6 +12,7 @@ var DB_URL string
 var COOKIE_SECURE bool
 var COOKIE_SESSION_NAME string
 var COOKIE_OAUTH2_STATE_NAME string
+var COOKIE_OAUTH2_STATE_MAX_AGE int
 
 // oauth2
 var OAUTH2_REDIRECT_URL string
@@ -32,6 +33,7 @@ func init() {
 	COOKIE_SECURE = must(strconv.ParseBool(os.Getenv("COOKIE_SECURE")))
 	COOKIE_SESSION_NAME = os.Getenv("COOKIE_SESSION_NAME")
 	COOKIE_OAUTH2_STATE_NAME = os.Getenv("COOKIE_OAUTH2_STATE_NAME")
+	COOKIE_OAUTH2_STATE_MAX_AGE = must(strconv.Atoi(os.Getenv("COOKIE_OAUTH2_STATE_MAX_AGE")))
 
 	// oauth2
 	OAUTH2_REDIRECT_URL = os.Getenv("OAUTH2_REDIRECT_URL")
