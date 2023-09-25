@@ -43,3 +43,6 @@ migrate-force:
 
 sqlboiler:
 	sqlboiler psql -c sqlboiler.toml
+
+schemaspy:
+	rm -rf ${PWD}/schemaspy/output && docker run --network=twinte-network -v ${PWD}/schemaspy/output:/output -v ${PWD}/schemaspy/schemaspy.properties:/schemaspy.properties schemaspy/schemaspy:latest
