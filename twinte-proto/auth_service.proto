@@ -18,7 +18,7 @@ enum Provider {
 
 message Authentication {
   Provider provider = 1;
-  string socialID = 2;
+  string social_id = 2;
 }
 
 message GetMeRequest {}

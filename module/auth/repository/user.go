@@ -7,7 +7,9 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/samber/lo"
 	"github.com/twin-te/twinte-back/apperr"
+	dbhelper "github.com/twin-te/twinte-back/db/helper"
 	dbmodel "github.com/twin-te/twinte-back/db/models"
 	"github.com/twin-te/twinte-back/idtype"
 	authentity "github.com/twin-te/twinte-back/module/auth/entity"
@@ -15,69 +17,19 @@ import (
 	"github.com/volatiletech/null/v8"
 	"github.com/volatiletech/sqlboiler/v4/boil"
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
-	"golang.org/x/exp/slices"
 )
 
 func (r *Impl) SaveUser(ctx context.Context, user *authentity.User) error {
-	return r.innerTransaction(ctx, func(db boil.ContextTransactor) error {
+	return r.innerTransaction(ctx, func(tx boil.ContextTransactor) error {
 		dbUser := &dbmodel.User{
 			ID: user.ID.String(),
 		}
 
-		if err := dbUser.Upsert(ctx, db, true, []string{dbmodel.UserColumns.ID}, boil.Infer(), boil.Infer()); err != nil {
+		if err := dbUser.Upsert(ctx, tx, true, []string{dbmodel.UserColumns.ID}, boil.Infer(), boil.Infer()); err != nil {
 			return err
 		}
 
-		existingDBAuthentications, err := dbmodel.UserAuthentications(
-			dbmodel.UserAuthenticationWhere.UserID.EQ(user.ID.String()),
-		).All(ctx, db)
-		if err != nil {
-			return err
-		}
-
-		existingAuthentications, err := fromDBUserAuthentications(existingDBAuthentications)
-		if err != nil {
-			return err
-		}
-
-		dbAuthenticationsToInsert := make(dbmodel.UserAuthenticationSlice, 0)
-		dbProvidersToDelete := make([]string, 0)
-
-		for _, authentication := range user.Authentications {
-			if !slices.Contains(existingAuthentications, authentication) {
-				dbAuthentication, err := toDBUserAuthentication(user.ID, authentication)
-				if err != nil {
-					return err
-				}
-				dbAuthenticationsToInsert = append(dbAuthenticationsToInsert, dbAuthentication)
-			}
-		}
-
-		for _, existingAuthentication := range existingAuthentications {
-			if !slices.Contains(user.Authentications, existingAuthentication) {
-				dbProvider, err := toDBProvider(existingAuthentication.Provider)
-				if err != nil {
-					return err
-				}
-				dbProvidersToDelete = append(dbProvidersToDelete, dbProvider)
-			}
-		}
-
-		// TODO: use batch insert
-		for _, dbAuthentication := range dbAuthenticationsToInsert {
-			if err := dbAuthentication.Insert(ctx, db, boil.Infer()); err != nil {
-				return err
-			}
-		}
-
-		if len(dbProvidersToDelete) != 0 {
-			_, err = dbmodel.UserAuthentications(
-				dbmodel.UserAuthenticationWhere.UserID.EQ(user.ID.String()),
-				dbmodel.UserAuthenticationWhere.Provider.IN(dbProvidersToDelete),
-			).DeleteAll(ctx, db)
-		}
-
-		return err
+		return r.saveUserAuthentications(ctx, tx, user)
 	}, false)
 }
 
@@ -133,6 +85,41 @@ func (r *Impl) DeleteUser(ctx context.Context, id idtype.UserID) error {
 	}, false)
 }
 
+func (r *Impl) saveUserAuthentications(ctx context.Context, db boil.ContextExecutor, user *authentity.User) error {
+	dbUserAuthentications, err := toDBUserAuthentications(user.ID, user.Authentications)
+	if err != nil {
+		return err
+	}
+
+	dbProviders := lo.Map(dbUserAuthentications, func(dbUserAuthentication *dbmodel.UserAuthentication, index int) string {
+		return dbUserAuthentication.Provider
+	})
+
+	_, err = dbmodel.UserAuthentications(
+		dbmodel.UserAuthenticationWhere.UserID.EQ(user.ID.String()),
+		dbmodel.UserAuthenticationWhere.Provider.NIN(dbProviders),
+	).DeleteAll(ctx, db)
+	if err != nil {
+		return err
+	}
+
+	args := make([]any, 0, 3*len(dbUserAuthentications))
+	for _, dbUserAuthentication := range dbUserAuthentications {
+		args = append(
+			args,
+			dbUserAuthentication.ID,
+			dbUserAuthentication.Provider,
+			dbUserAuthentication.SocialID,
+		)
+	}
+
+	query := fmt.Sprintf(`insert into user_authentications (user_id,provider,social_id) values %s
+on conflict (user_id,provider)
+do update set (social_id) = (excluded.social_id)`, dbhelper.CreateValuesQuery(3, len(dbUserAuthentications)))
+
+	return dbhelper.ExecPreparedStmt(ctx, db, query, args)
+}
+
 func fromDBProvider(dbProvider string) (authentity.Provider, error) {
 	switch dbProvider {
 	case dbmodel.UserAuthenticationsProviderEnumGoogle:
@@ -171,6 +158,20 @@ func fromDBUserAuthentication(dbUserAuthentication *dbmodel.UserAuthentication) 
 	return userAuthentication, nil
 }
 
+func fromDBUserAuthentications(dbUserAuthentications dbmodel.UserAuthenticationSlice) ([]authentity.UserAuthentication, error) {
+	userAuthentications := make([]authentity.UserAuthentication, 0, len(dbUserAuthentications))
+
+	for _, dbUserAuthentication := range dbUserAuthentications {
+		userAuthentication, err := fromDBUserAuthentication(dbUserAuthentication)
+		if err != nil {
+			return nil, err
+		}
+		userAuthentications = append(userAuthentications, userAuthentication)
+	}
+
+	return userAuthentications, nil
+}
+
 func toDBUserAuthentication(userID idtype.UserID, userAuthentication authentity.UserAuthentication) (*dbmodel.UserAuthentication, error) {
 	dbProvider, err := toDBProvider(userAuthentication.Provider)
 	if err != nil {
@@ -186,18 +187,16 @@ func toDBUserAuthentication(userID idtype.UserID, userAuthentication authentity.
 	return dbUserAuthentication, nil
 }
 
-func fromDBUserAuthentications(dbUserAuthentications dbmodel.UserAuthenticationSlice) ([]authentity.UserAuthentication, error) {
-	userAuthentications := make([]authentity.UserAuthentication, 0, len(dbUserAuthentications))
-
-	for _, dbUserAuthentication := range dbUserAuthentications {
-		userAuthentication, err := fromDBUserAuthentication(dbUserAuthentication)
+func toDBUserAuthentications(userID idtype.UserID, userAuthentications []authentity.UserAuthentication) (dbmodel.UserAuthenticationSlice, error) {
+	dbUserAuthentications := make(dbmodel.UserAuthenticationSlice, 0, len(userAuthentications))
+	for _, userAuthentication := range userAuthentications {
+		dbUserAuthentication, err := toDBUserAuthentication(userID, userAuthentication)
 		if err != nil {
 			return nil, err
 		}
-		userAuthentications = append(userAuthentications, userAuthentication)
+		dbUserAuthentications = append(dbUserAuthentications, dbUserAuthentication)
 	}
-
-	return userAuthentications, nil
+	return dbUserAuthentications, nil
 }
 
 func fromDBUser(dbUser *dbmodel.User) (*authentity.User, error) {
@@ -206,16 +205,14 @@ func fromDBUser(dbUser *dbmodel.User) (*authentity.User, error) {
 		return nil, err
 	}
 
-	user := &authentity.User{
-		ID: id,
+	userAuthentications, err := fromDBUserAuthentications(dbUser.R.GetUserAuthentications())
+	if err != nil {
+		return nil, err
 	}
 
-	for _, dbUserAuthentication := range dbUser.R.GetUserAuthentications() {
-		userAuthentication, err := fromDBUserAuthentication(dbUserAuthentication)
-		if err != nil {
-			return nil, err
-		}
-		user.Authentications = append(user.Authentications, userAuthentication)
+	user := &authentity.User{
+		ID:              id,
+		Authentications: userAuthentications,
 	}
 
 	return user, nil

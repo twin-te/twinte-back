@@ -1,4 +1,5 @@
 CourseID
+EventID
 RegisteredCourseID
 SessionID
 TagID

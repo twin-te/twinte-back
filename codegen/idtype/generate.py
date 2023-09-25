@@ -1,5 +1,6 @@
 import pathlib
 import re
+import shutil
 import string
 
 
@@ -49,12 +50,17 @@ def generate(
 def main():
     file_path = pathlib.Path(__file__)
 
+    int_template_path = file_path.parent.joinpath("int_template.txt")
+    int_definition_path = file_path.parent.joinpath("int_definition.txt")
+
     uuid_template_path = file_path.parent.joinpath("uuid_template.txt")
     uuid_definition_path = file_path.parent.joinpath("uuid_definition.txt")
 
     output_dir_path = file_path.parents[2].joinpath("idtype")
-    output_dir_path.mkdir(parents=True, exist_ok=True)
+    shutil.rmtree(output_dir_path)
+    output_dir_path.mkdir(parents=True)
 
+    generate(int_template_path, int_definition_path, output_dir_path)
     generate(uuid_template_path, uuid_definition_path, output_dir_path)
 
 
