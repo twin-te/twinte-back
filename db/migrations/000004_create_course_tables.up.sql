@@ -174,4 +174,8 @@ TABLESPACE pg_default;
 ALTER TABLE IF EXISTS public.course_schedules
     OWNER to postgres;
 
+ALTER SEQUENCE public.course_methods_id_seq OWNED BY course_methods.id;
+ALTER SEQUENCE public.course_recommended_grades_id_seq OWNED BY course_recommended_grades.id;
+ALTER SEQUENCE public.course_schedules_id_seq OWNED BY course_schedules.id;
+
 COMMIT;
