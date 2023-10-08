@@ -1,0 +1,13 @@
+session
+schema_migrations
+already_reads
+user_authentications
+registered_course_tags
+course_schedules
+course_recommended_grades
+course_methods
+users
+tags
+registered_courses
+payment_users
+courses
