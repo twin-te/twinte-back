@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/twin-te/twinte-back/base"
+	"golang.org/x/exp/constraints"
 )
 
 //go:generate go run golang.org/x/tools/cmd/stringer -type=Module -trimprefix=Module -output=module_string.gen.go
@@ -107,7 +108,11 @@ func (p Period) Int() int {
 	return int(p)
 }
 
-func ParsePeriod(i int) (Period, error) {
+func (p Period) IsZero() bool {
+	return p == 0
+}
+
+func ParsePeriod[T constraints.Signed](i T) (Period, error) {
 	if 1 <= i && i <= 8 {
 		return Period(i), nil
 	}
@@ -140,27 +145,21 @@ func (s Schedule) IsSpecial() bool {
 	return s.Day.IsSpecial()
 }
 
-func NewNormalSchedule(module Module, day Day, period Period, rooms string) (Schedule, error) {
-	if !day.IsNormal() {
-		return Schedule{}, fmt.Errorf("the given day is not normal day %v", day)
+func ConstructSchedule(fn func() (schedule Schedule, err error)) (schedule Schedule, err error) {
+	schedule, err = fn()
+	if err != nil {
+		return
 	}
-	return Schedule{
-		Module: module,
-		Day:    day,
-		Period: period,
-		Rooms:  rooms,
-	}, nil
-}
 
-func NewSpecialSchedule(module Module, day Day, rooms string) (Schedule, error) {
-	if !day.IsSpecial() {
-		return Schedule{}, fmt.Errorf("the given day is not special day %v", day)
+	if schedule.Day.IsNormal() && !schedule.Period.IsZero() {
+		return
 	}
-	return Schedule{
-		Module: module,
-		Day:    day,
-		Rooms:  rooms,
-	}, nil
+
+	if schedule.Day.IsSpecial() && schedule.Period.IsZero() {
+		return
+	}
+
+	return schedule, fmt.Errorf("failed to construct %#v", schedule)
 }
 
 func ParseSchedule(module string, day string, period int, rooms string) (s Schedule, err error) {
