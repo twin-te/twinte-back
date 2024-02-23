@@ -54,6 +54,27 @@ func (r *impl) FindUser(ctx context.Context, conds authport.FindUserConds, lock 
 	return fromDBUser(dbUser)
 }
 
+func (r *impl) ListUsers(ctx context.Context, conds authport.ListUsersConds, lock sharedport.Lock) ([]*authdomain.User, error) {
+	var dbUsers []*model.User
+
+	err := r.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		return tx.
+			Where(`"deletedAt" IS NULL`).
+			Clauses(clause.Locking{
+				Strength: lo.Ternary(lock == sharedport.LockExclusive, "UPDATE", "SHARE"),
+				Table:    clause.Table{Name: clause.CurrentTable},
+			}).
+			Preload("UserAuthentications").
+			Find(&dbUsers).
+			Error
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return base.MapWithErr(dbUsers, fromDBUser)
+}
+
 func (r *impl) CreateUsers(ctx context.Context, users ...*authdomain.User) error {
 	dbUsers := base.MapWithArg(users, true, toDBUser)
 	return r.db.WithContext(ctx).Transaction(func(db *gorm.DB) error {

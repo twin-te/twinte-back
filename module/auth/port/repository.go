@@ -14,6 +14,7 @@ type Repository interface {
 	Transaction(ctx context.Context, fn func(rtx Repository) error) error
 
 	FindUser(ctx context.Context, conds FindUserConds, lock sharedport.Lock) (*authdomain.User, error)
+	ListUsers(ctx context.Context, conds ListUsersConds, lock sharedport.Lock) ([]*authdomain.User, error)
 	CreateUsers(ctx context.Context, users ...*authdomain.User) error
 	UpdateUser(ctx context.Context, user *authdomain.User) error
 	DeleteUsers(ctx context.Context, conds DeleteUserConds) (rowsAffected int, err error)
@@ -36,6 +37,8 @@ func (conds FindUserConds) Validate() error {
 	}
 	return nil
 }
+
+type ListUsersConds struct{}
 
 type DeleteUserConds struct {
 	ID *idtype.UserID

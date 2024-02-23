@@ -22,12 +22,6 @@ bash-db:
 psql:
 	docker compose exec -it db psql -U postgres -d twinte_db
 
-tidy:
-	go mod tidy
-
-test:
-	go test -count=1 ./...
-
 # e.g. make migrate-create name=foo
 migrate-create:
 	migrate create -dir ./db/migrations -ext sql -seq -digits 6 ${name}

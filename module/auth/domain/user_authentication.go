@@ -2,9 +2,9 @@ package authdomain
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/twin-te/twinte-back/base"
-	shareddomain "github.com/twin-te/twinte-back/module/shared/domain"
 )
 
 //go:generate go run golang.org/x/tools/cmd/stringer -type=Provider -trimprefix=Provider -output=provider_string.gen.go
@@ -31,13 +31,22 @@ func ParseProvider(s string) (Provider, error) {
 }
 
 // SocialID represents provider's user id
-type SocialID struct {
-	shareddomain.RequiredString
+type SocialID string
+
+func (sid SocialID) String() string {
+	return string(sid)
+}
+
+func (sid SocialID) IsZero() bool {
+	return sid == ""
 }
 
 func ParseSocialID(s string) (SocialID, error) {
-	rs, err := shareddomain.NewRequiredStringParser("social id")(s)
-	return SocialID{rs}, err
+	v := strings.TrimSpace(s)
+	if v == "" {
+		return "", fmt.Errorf("social id must not be empty")
+	}
+	return SocialID(v), nil
 }
 
 type UserAuthentication struct {
