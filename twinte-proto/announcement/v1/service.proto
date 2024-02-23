@@ -1,0 +1,42 @@
+syntax = "proto3";
+package announcement.v1;
+
+import "announcement/v1/type.proto";
+import "shared/type.proto";
+
+option go_package = "github.com/twin-te/twinte-back/api/rpcgen/announcement/v1;announcementv1";
+
+service AnnouncementService {
+  // PermissionPublic
+  rpc GetAnnouncements(GetAnnouncementsRequest) returns (GetAnnouncementsResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+
+  // PermissionAuthNUser
+
+  rpc GetReadFlags(GetReadFlagsRequest) returns (GetReadFlagsResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+  rpc UpdateReadFlag(UpdateReadFlagRequest) returns (UpdateReadFlagResponse);
+}
+
+message GetAnnouncementsRequest {}
+
+message GetAnnouncementsResponse {
+  repeated Announcement announcements = 1;
+}
+
+message GetReadFlagsRequest {
+  repeated shared.UUID ids = 1;
+}
+
+message GetReadFlagsResponse {
+  repeated bool read_flags = 1;
+}
+
+message UpdateReadFlagRequest {
+  shared.UUID id = 1;
+  bool read_flag = 2;
+}
+
+message UpdateReadFlagResponse {}

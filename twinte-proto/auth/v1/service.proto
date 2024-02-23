@@ -1,0 +1,37 @@
+syntax = "proto3";
+package auth.v1;
+
+import "auth/v1/type.proto";
+
+option go_package = "github.com/twin-te/twinte-back/api/rpcgen/auth/v1;authv1";
+
+service AuthService {
+  // PermissionAuthNUser
+
+  rpc GetMe(GetMeRequest) returns (GetMeResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+  rpc DeleteUserAuthentication(DeleteUserAuthenticationRequest) returns (DeleteUserAuthenticationResponse);
+  rpc Logout(LogoutRequest) returns (LogoutResponse);
+  rpc DeleteAccount(DeleteAccountRequest) returns (DeleteAccountResponse);
+}
+
+message GetMeRequest {}
+
+message GetMeResponse {
+  User user = 1;
+}
+
+message DeleteUserAuthenticationRequest {
+  Provider provider = 1;
+}
+
+message DeleteUserAuthenticationResponse {}
+
+message LogoutRequest {}
+
+message LogoutResponse {}
+
+message DeleteAccountRequest {}
+
+message DeleteAccountResponse {}
