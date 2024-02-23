@@ -2,6 +2,7 @@ package shareddomain
 
 import (
 	"fmt"
+	"time"
 )
 
 // AcademicYear starts in April and ends in March.
@@ -13,12 +14,19 @@ func (year AcademicYear) Int() int {
 }
 
 func (year AcademicYear) IsZero() bool {
-	return year.Int() == 0
+	return year == 0
 }
 
 func ParseAcademicYear(i int) (AcademicYear, error) {
-	if i == 0 {
+	if i <= 0 {
 		return 0, fmt.Errorf("failed to parse AcademicYear %#v", i)
 	}
 	return AcademicYear(i), nil
+}
+
+func NewAcademicYear(year int, month time.Month) (AcademicYear, error) {
+	if month < time.April {
+		year -= 1
+	}
+	return ParseAcademicYear(year)
 }
