@@ -3,6 +3,8 @@ package appenv
 import (
 	"os"
 	"strconv"
+
+	"github.com/samber/lo"
 )
 
 // db
@@ -28,7 +30,15 @@ var OAUTH2_TWITTER_CLIENT_SECRET string
 var OAUTH2_TWITTER_CALLBACK_URL string
 
 // timetable
-var KDB_JSON_FILE_PATH string
+var COURSE_CACHE_HOURS int
+
+// donation
+var STRIPE_KEY string
+var STRIPE_CHECKOUT_SUCCESS_URL string
+var STRIPE_CHECKOUT_CANCEL_URL string
+
+// api
+var ADDR string
 
 func init() {
 	// db
@@ -54,7 +64,7 @@ func init() {
 	OAUTH2_TWITTER_CALLBACK_URL = os.Getenv("OAUTH2_TWITTER_CALLBACK_URL")
 
 	// timetable
-	KDB_JSON_FILE_PATH = os.Getenv("KDB_JSON_FILE_PATH")
+	COURSE_CACHE_HOURS = lo.Must(strconv.Atoi(os.Getenv("COURSE_CACHE_HOURS")))
 }
 
 func must[T any](v T, err error) T {
