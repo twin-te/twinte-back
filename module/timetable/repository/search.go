@@ -15,51 +15,8 @@ import (
 	timetableport "github.com/twin-te/twinte-back/module/timetable/port"
 )
 
-var (
-	cache           = make(map[shareddomain.AcademicYear][]*timetabledomain.Course)
-	mu              sync.Mutex
-	CourseCacheTime time.Duration = time.Duration(appenv.COURSE_CACHE_HOURS) * time.Hour
-)
-
-func (r *impl) GetCoursesWithCache(ctx context.Context, year shareddomain.AcademicYear) (courses []*timetabledomain.Course, err error) {
-	mu.Lock()
-	defer mu.Unlock()
-
-	courses, ok := cache[year]
-	if ok {
-		return
-	}
-
-	courses, err = r.ListCourses(ctx, timetableport.ListCoursesConds{
-		Year: &year,
-	}, sharedport.LockNone)
-	if err != nil {
-		return
-	}
-
-	totalNumCourses := lo.Reduce(lo.Keys(cache), func(totalNumCourses int, year shareddomain.AcademicYear, _ int) int {
-		return totalNumCourses + len(cache[year])
-	}, 0)
-
-	if totalNumCourses+len(courses) > 100_000 {
-		minYear := lo.Min(lo.Keys(cache))
-		delete(cache, minYear)
-	}
-
-	cache[year] = courses
-
-	go func() {
-		time.Sleep(CourseCacheTime)
-		mu.Lock()
-		delete(cache, year)
-		mu.Unlock()
-	}()
-
-	return
-}
-
 func (r *impl) SearchCourses(ctx context.Context, conds timetableport.SearchCoursesConds) ([]*timetabledomain.Course, error) {
-	courses, err := r.GetCoursesWithCache(ctx, conds.Year)
+	courses, err := r.getCoursesWithCache(ctx, conds.Year)
 	if err != nil {
 		return nil, err
 	}
@@ -85,11 +42,18 @@ func (r *impl) SearchCourses(ctx context.Context, conds timetableport.SearchCour
 
 	// Filter by schedules
 	courses = lo.Filter(courses, func(course *timetabledomain.Course, _ int) bool {
-		return lo.Every(conds.Schedules.FullyIncluded, course.Schedules)
+		return lo.EveryBy(conds.Schedules.FullyIncluded, func(s1 timetabledomain.Schedule) bool {
+			return lo.SomeBy(course.Schedules, func(s2 timetabledomain.Schedule) bool {
+				return s1.Module == s2.Module && s1.Day == s2.Day && s1.Period == s2.Period
+			})
+		})
 	})
 	courses = lo.Filter(courses, func(course *timetabledomain.Course, _ int) bool {
-		intersect := lo.Intersect(course.Schedules, conds.Schedules.PartiallyOverlapped)
-		return len(intersect) > 0
+		return lo.SomeBy(conds.Schedules.PartiallyOverlapped, func(s1 timetabledomain.Schedule) bool {
+			return lo.SomeBy(course.Schedules, func(s2 timetabledomain.Schedule) bool {
+				return s1.Module == s2.Module && s1.Day == s2.Day && s1.Period == s2.Period
+			})
+		})
 	})
 
 	// Apply offset
@@ -99,4 +63,52 @@ func (r *impl) SearchCourses(ctx context.Context, conds timetableport.SearchCour
 	courses = courses[:lo.Clamp(conds.Limit, 0, len(courses))]
 
 	return base.MapByClone(courses), nil
+}
+
+var (
+	cache                = make(map[shareddomain.AcademicYear][]*timetabledomain.Course)
+	mu                   sync.Mutex
+	courseCacheTime      time.Duration = time.Duration(appenv.COURSE_CACHE_HOURS) * time.Hour
+	maxNumCoursesToCache               = 100_000
+)
+
+func (r *impl) getCoursesWithCache(ctx context.Context, year shareddomain.AcademicYear) (courses []*timetabledomain.Course, err error) {
+	mu.Lock()
+	defer mu.Unlock()
+
+	courses, ok := cache[year]
+	if ok {
+		return
+	}
+
+	courses, err = r.ListCourses(ctx, timetableport.ListCoursesConds{
+		Year: &year,
+	}, sharedport.LockNone)
+	if err != nil {
+		return
+	}
+
+	cache[year] = courses
+
+	for len(cache) != 0 {
+		totalNumCourses := lo.Reduce(lo.Keys(cache), func(totalNumCourses int, year shareddomain.AcademicYear, _ int) int {
+			return totalNumCourses + len(cache[year])
+		}, 0)
+
+		if totalNumCourses <= maxNumCoursesToCache {
+			break
+		}
+
+		minYear := lo.Min(lo.Keys(cache))
+		delete(cache, minYear)
+	}
+
+	go func() {
+		time.Sleep(courseCacheTime)
+		mu.Lock()
+		delete(cache, year)
+		mu.Unlock()
+	}()
+
+	return
 }
