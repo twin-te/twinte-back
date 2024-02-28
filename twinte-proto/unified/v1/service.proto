@@ -1,0 +1,28 @@
+syntax = "proto3";
+package unified.v1;
+
+import "announcement/v1/type.proto";
+import "auth/v1/type.proto";
+import "schoolcalendar/v1/type.proto";
+import "timetable/v1/type.proto";
+
+option go_package = "github.com/twin-te/twinte-back/handler/api/rpcgen/unified/v1;unifiedv1";
+
+service UnifiedService {
+  rpc GetForFront(GetForFrontRequest) returns (GetForFrontResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+}
+
+message GetForFrontRequest {}
+
+// If the user is not authenticated, the lengths of registered_courses, tags and read_flags are 0.
+message GetForFrontResponse {
+  optional auth.v1.User me = 1;
+  optional schoolcalendar.v1.Event todays_event = 2;
+  schoolcalendar.v1.Module current_module = 3;
+  repeated timetable.v1.RegisteredCourse registered_courses = 4;
+  repeated timetable.v1.Tag tags = 5;
+  repeated announcement.v1.Announcement announcements = 6;
+  repeated bool read_flags = 7;
+}

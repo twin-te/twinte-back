@@ -1,0 +1,47 @@
+syntax = "proto3";
+package nativeapp.v1;
+
+import "schoolcalendar/v1/type.proto";
+import "shared/type.proto";
+import "timetable/v1/type.proto";
+
+option go_package = "github.com/twin-te/twinte-back/handler/api/rpcgen/nativeapp/v1;nativeappv1";
+
+service NativeAppService {
+  // GetForWidget returns the data for widget.
+  //
+  // [Authentication] optional
+  rpc GetForWidget(GetForWidgetRequest) returns (GetForWidgetResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+
+  // CheckVersion checks if the native app needs to be updated.
+  //
+  // [Authentication] not required
+  rpc CheckVersion(CheckVersionRequest) returns (CheckVersionResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+}
+
+message GetForWidgetRequest {
+  shared.RFC3339FullDate date = 1;
+}
+
+// If the user is not authenticated, the length of registered_courses is 0.
+message GetForWidgetResponse {
+  repeated schoolcalendar.v1.Event events = 1;
+  schoolcalendar.v1.Module current_module = 2;
+  repeated timetable.v1.RegisteredCourse registered_courses = 3; // in this academic year
+}
+
+message CheckVersionRequest {
+  string platform = 1; // ios or android
+  string current_version = 2;
+  string user_agent = 3;
+}
+
+message CheckVersionResponse {
+  string latest_version = 1;
+  string update = 2; // unnecessary, optional or forced
+  string message = 3;
+}

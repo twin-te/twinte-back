@@ -1,0 +1,34 @@
+syntax = "proto3";
+package schoolcalendar.v1;
+
+import "schoolcalendar/v1/type.proto";
+import "shared/type.proto";
+
+option go_package = "github.com/twin-te/twinte-back/handler/api/rpcgen/schoolcalendar/v1;schoolcalendarv1";
+
+service SchoolCalendarService {
+  // PermissionPublic
+
+  rpc GetEvents(GetEventsRequest) returns (GetEventsResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+  rpc GetModuleDetails(GetModuleDetailsRequest) returns (GetModuleDetailsResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+}
+
+message GetEventsRequest {
+  shared.AcademicYear year = 1;
+}
+
+message GetEventsResponse {
+  repeated Event events = 1;
+}
+
+message GetModuleDetailsRequest {
+  shared.AcademicYear year = 1;
+}
+
+message GetModuleDetailsResponse {
+  repeated ModuleDetail module_details = 1;
+}

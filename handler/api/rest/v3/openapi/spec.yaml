@@ -1,0 +1,1392 @@
+openapi: 3.0.3
+info:
+  title: Twinte API
+  description: Twinte API Gateway
+  version: 2.0.0
+servers:
+  - url: http://localhost:3000/
+    description: localhost
+  - url: https://app.dev.twinte.net/api/v3
+    description: dev server
+  - url: https://app.twinte.net/api/v3
+    description: production server
+  - url: https://api.dev.twinte.net/v3
+    description: tmp
+security:
+  - cookieAuth: []
+
+paths:
+  /school-calendar/events:
+    get:
+      summary: 学年暦のイベントを取得する
+      tags:
+        - 学年暦
+      parameters:
+        - name: year
+          in: query
+          required: true
+          schema:
+            type: integer
+      responses:
+        200:
+          description: 成功
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/SchoolCalendarEvent"
+        400:
+          $ref: "#/components/responses/BadRequestError"
+        401:
+          $ref: "#/components/responses/UnauthorizedError"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+
+  /school-calendar/modules:
+    get:
+      summary: 学年暦のモジュール期間を取得する
+      tags:
+        - 学年暦
+      parameters:
+        - name: year
+          in: query
+          required: true
+          schema:
+            type: integer
+      responses:
+        200:
+          description: 成功
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/SchoolCalendarModule"
+        400:
+          $ref: "#/components/responses/BadRequestError"
+        401:
+          $ref: "#/components/responses/UnauthorizedError"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+
+  /courses/search:
+    post:
+      summary: 講義を検索する
+      tags:
+        - 講義
+      requestBody:
+        description: 検索クエリ
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - year
+                - keywords
+              properties:
+                year:
+                  type: integer
+                searchMode:
+                  description: >
+                    検索モード
+                    Cover 指定した時限と講義の開講日時が一部でも被っていれば対象とみなす
+                    Contain 指定した時限に収まっている講義のみ対象とみなす
+                    デフォルトはCover
+                  type: string
+                  enum:
+                    - Cover
+                    - Contain
+                  default: Cover
+                keywords:
+                  type: array
+                  items:
+                    type: string
+                codes:
+                  type: array
+                  items:
+                    type: string
+                limit:
+                  type: integer
+                  minimum: 1
+                  maximum: 100
+                  default: 20
+                  example: 20
+                offset:
+                  type: integer
+                  minimum: 0
+                  default: 0
+                timetable:
+                  $ref: "#/components/schemas/SearchCourseTimetableQuery"
+
+      responses:
+        200:
+          description: 成功
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Course"
+        400:
+          $ref: "#/components/responses/BadRequestError"
+        401:
+          $ref: "#/components/responses/UnauthorizedError"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+
+  /courses/{year}/{code}:
+    get:
+      summary: 指定した講義を取得する
+      tags:
+        - 講義
+      parameters:
+        - name: year
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: code
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Course"
+        400:
+          $ref: "#/components/responses/BadRequestError"
+        401:
+          $ref: "#/components/responses/UnauthorizedError"
+        404:
+          $ref: "#/components/responses/NotFoundError"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+  /courses:
+    get:
+      summary: 指定した複数の講義を取得する
+      description: >
+        指定した複数の講義を取得する。
+        指定された講義が一部見つからない場合もエラーなく完了するが、
+        それらは結果には含まれない。
+      tags:
+        - 講義
+      parameters:
+        - name: year
+          in: query
+          required: true
+          schema:
+            type: integer
+        - name: codes
+          in: query
+          description: 複数講義をカンマ区切りで指定できる
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: 成功
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Course"
+        400:
+          $ref: "#/components/responses/BadRequestError"
+        401:
+          $ref: "#/components/responses/UnauthorizedError"
+        404:
+          $ref: "#/components/responses/NotFoundError"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+
+  /registered-courses:
+    get:
+      summary: 登録済みの講義を返す
+      tags:
+        - 登録された講義
+      parameters:
+        - name: year
+          in: query
+          required: true
+          schema:
+            type: integer
+      responses:
+        200:
+          description: 成功
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/RegisteredCourse"
+        400:
+          $ref: "#/components/responses/BadRequestError"
+        401:
+          $ref: "#/components/responses/UnauthorizedError"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+
+    post:
+      summary: 講義を登録する
+      tags:
+        - 登録された講義
+      requestBody:
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - type: object
+                  required:
+                    - year
+                    - code
+                  properties:
+                    year:
+                      type: integer
+                    code:
+                      type: string
+                - type: array
+                  items:
+                    type: object
+                    required:
+                      - year
+                      - code
+                    properties:
+                      year:
+                        type: integer
+                      code:
+                        type: string
+                - type: object
+                  required:
+                    - year
+                    - name
+                    - instructor
+                    - credit
+                    - methods
+                    - schedules
+                    - tags
+                  properties:
+                    year:
+                      type: integer
+                    name:
+                      type: string
+                    instructor:
+                      type: string
+                    credit:
+                      type: number
+                    methods:
+                      type: array
+                      items:
+                        $ref: "#/components/schemas/CourseMethod"
+                    schedules:
+                      type: array
+                      items:
+                        $ref: "#/components/schemas/CourseSchedule"
+                    tags:
+                      type: array
+                      items:
+                        $ref: "#/components/schemas/TagIdOnly"
+      responses:
+        200:
+          description: 成功
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: "#/components/schemas/RegisteredCourse"
+                  - type: array
+                    items:
+                      $ref: "#/components/schemas/RegisteredCourse"
+        400:
+          $ref: "#/components/responses/BadRequestError"
+        401:
+          $ref: "#/components/responses/UnauthorizedError"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+
+  /registered-courses/{id}:
+    get:
+      summary: 指定した登録された講義を取得する
+      tags:
+        - 登録された講義
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        200:
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RegisteredCourse"
+        400:
+          $ref: "#/components/responses/BadRequestError"
+        401:
+          $ref: "#/components/responses/UnauthorizedError"
+        404:
+          $ref: "#/components/responses/NotFoundError"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+
+    put:
+      summary: 指定した登録された講義を更新する
+      tags:
+        - 登録された講義
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              allOf:
+                - type: object
+                  properties:
+                    course:
+                      type: object
+                      required:
+                        - id
+                      properties:
+                        id:
+                          type: string
+                          format: uuid
+                - $ref: "#/components/schemas/RegisteredCourseWithoutID"
+      responses:
+        200:
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RegisteredCourse"
+        400:
+          $ref: "#/components/responses/BadRequestError"
+        401:
+          $ref: "#/components/responses/UnauthorizedError"
+        404:
+          $ref: "#/components/responses/NotFoundError"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+
+    delete:
+      summary: 指定した登録された講義を削除する
+      tags:
+        - 登録された講義
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        204:
+          description: 成功
+        400:
+          $ref: "#/components/responses/BadRequestError"
+        401:
+          $ref: "#/components/responses/UnauthorizedError"
+        404:
+          $ref: "#/components/responses/NotFoundError"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+
+  /tags:
+    get:
+      summary: 全てのタグを取得する
+      tags:
+        - タグ
+      responses:
+        200:
+          description: 成功
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Tag"
+        401:
+          $ref: "#/components/responses/UnauthorizedError"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+
+    post:
+      summary: タグを作成する
+      description: 新しいタグは末尾に追加されます
+      tags:
+        - タグ
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+              properties:
+                name:
+                  type: string
+      responses:
+        200:
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Tag"
+        400:
+          $ref: "#/components/responses/BadRequestError"
+        401:
+          $ref: "#/components/responses/UnauthorizedError"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+    patch:
+      summary: タグを並べ替える
+      description: |-
+        positionを変更するタグのidとpositionの配列を送信してください。
+        positionが重複している場合はエラーになります。
+      tags:
+        - タグ
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: "#/components/schemas/TagPositionOnly"
+      responses:
+        200:
+          description: 成功
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/TagPositionOnly"
+        400:
+          $ref: "#/components/responses/BadRequestError"
+        401:
+          $ref: "#/components/responses/UnauthorizedError"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+
+  /tags/{id}:
+    put:
+      summary: タグを更新する
+      tags:
+        - タグ
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+              properties:
+                name:
+                  type: string
+      responses:
+        200:
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Tag"
+        400:
+          $ref: "#/components/responses/BadRequestError"
+        401:
+          $ref: "#/components/responses/UnauthorizedError"
+        404:
+          $ref: "#/components/responses/NotFoundError"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+
+    delete:
+      summary: タグを削除する
+      tags:
+        - タグ
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        204:
+          description: 成功
+        400:
+          $ref: "#/components/responses/BadRequestError"
+        401:
+          $ref: "#/components/responses/UnauthorizedError"
+        404:
+          $ref: "#/components/responses/NotFoundError"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+
+  /users/me:
+    get:
+      summary: ログイン中のユーザーを取得する
+      tags:
+        - ユーザー
+      responses:
+        200:
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        401:
+          $ref: "#/components/responses/UnauthorizedError"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+    delete:
+      summary: ログイン中のユーザーを退会する
+      tags:
+        - ユーザー
+      responses:
+        204:
+          description: 成功
+        401:
+          $ref: "#/components/responses/UnauthorizedError"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+
+  /timetable/{date}:
+    get:
+      summary: 指定された日付の日程＆時間割情報を取得する
+      tags:
+        - ウィジット用
+      parameters:
+        - in: path
+          name: date
+          required: true
+          schema:
+            type: string
+            format: date
+      responses:
+        200:
+          description: 成功
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - date
+                  - events
+                  - courses
+                properties:
+                  date:
+                    type: string
+                    format: date
+                  module:
+                    $ref: "#/components/schemas/SchoolCalendarModule"
+                  events:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/SchoolCalendarEvent"
+                  courses:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/RegisteredCourse"
+        400:
+          $ref: "#/components/responses/BadRequestError"
+        401:
+          $ref: "#/components/responses/UnauthorizedError"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+
+  /donation/payment:
+    get:
+      summary: 請求一覧を取得
+      tags:
+        - 寄付決済
+      responses:
+        200:
+          description: 成功
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Payment"
+        400:
+          $ref: "#/components/responses/BadRequestError"
+        401:
+          $ref: "#/components/responses/UnauthorizedError"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+
+  /donation/subscriptions:
+    get:
+      summary: 契約中のサブスクを取得する
+      tags:
+        - 寄付決済
+      responses:
+        200:
+          description: 成功
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Subscription"
+        400:
+          $ref: "#/components/responses/BadRequestError"
+        401:
+          $ref: "#/components/responses/UnauthorizedError"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+
+  /donation/subscriptions/{id}:
+    delete:
+      summary: 指定したサブスクを解除
+      tags:
+        - 寄付決済
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: 成功
+        400:
+          $ref: "#/components/responses/BadRequestError"
+        401:
+          $ref: "#/components/responses/UnauthorizedError"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+  /donation/users/me:
+    get:
+      summary: 支払いユーザー取得
+      tags:
+        - 寄付決済
+      responses:
+        200:
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentUser"
+        400:
+          $ref: "#/components/responses/BadRequestError"
+        401:
+          $ref: "#/components/responses/UnauthorizedError"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+    patch:
+      summary: 支払いユーザー情報更新
+      tags:
+        - 寄付決済
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                displayName:
+                  type: string
+                link:
+                  type: string
+      responses:
+        200:
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentUser"
+        400:
+          $ref: "#/components/responses/BadRequestError"
+        401:
+          $ref: "#/components/responses/UnauthorizedError"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+
+  /donation/session/onetime:
+    post:
+      summary: 単発寄付のセッションを作成
+      security: []
+      tags:
+        - 寄付決済
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - amount
+              properties:
+                amount:
+                  type: integer
+      responses:
+        200:
+          description: 成功
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - sessionId
+                properties:
+                  sessionId:
+                    type: string
+        400:
+          $ref: "#/components/responses/BadRequestError"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+
+  /donation/session/subscription:
+    post:
+      summary: サブスク寄付のセッションを作成
+      tags:
+        - 寄付決済
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - planId
+              properties:
+                planId:
+                  type: string
+      responses:
+        200:
+          description: 成功
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - sessionId
+                properties:
+                  sessionId:
+                    type: string
+        400:
+          $ref: "#/components/responses/BadRequestError"
+        401:
+          $ref: "#/components/responses/UnauthorizedError"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+
+  /donation/aggregate/totalAmount:
+    get:
+      summary: 寄付総額を取得
+      security: []
+      tags:
+        - 寄付決済
+      responses:
+        200:
+          description: 成功
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - total
+                properties:
+                  total:
+                    type: integer
+        400:
+          $ref: "#/components/responses/BadRequestError"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+
+  /donation/aggregate/users:
+    get:
+      summary: 寄付してくれたユーザーで掲載OKのユーザー一覧を取得
+      security: []
+      tags:
+        - 寄付決済
+      responses:
+        200:
+          description: 成功
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    displayName:
+                      type: string
+                    link:
+                      type: string
+        400:
+          $ref: "#/components/responses/BadRequestError"
+        401:
+          $ref: "#/components/responses/UnauthorizedError"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+  /information:
+    get:
+      summary: お知らせを取得
+      security: []
+      tags:
+        - お知らせ
+      parameters:
+        - name: limit
+          in: query
+          required: true
+          schema:
+            type: integer
+        - name: offset
+          in: query
+          required: true
+          schema:
+            type: integer
+      responses:
+        200:
+          description: 成功
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Information"
+        400:
+          $ref: "#/components/responses/BadRequestError"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+  /information/{id}:
+    put:
+      summary: お知らせの既読
+      tags:
+        - お知らせ
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - read
+              properties:
+                read:
+                  type: boolean
+      responses:
+        200:
+          description: 成功
+        400:
+          $ref: "#/components/responses/BadRequestError"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+tags:
+  - name: 学年暦
+  - name: 講義
+  - name: 登録された講義
+  - name: タグ
+  - name: ウィジット用
+  - name: お知らせ
+  - name: ユーザー
+  - name: 寄付決済
+
+components:
+  schemas:
+    CourseMethod:
+      type: string
+      enum:
+        - FaceToFace
+        - Synchronous
+        - Asynchronous
+        - Others
+
+    CourseModule:
+      type: string
+      enum:
+        - SpringA
+        - SpringB
+        - SpringC
+        - SummerVacation
+        - FallA
+        - FallB
+        - FallC
+        - SpringVacation
+        - Unknown
+
+    CourseSchedule:
+      type: object
+      required:
+        - module
+        - day
+        - period
+        - room
+      properties:
+        module:
+          $ref: "#/components/schemas/CourseModule"
+        day:
+          $ref: "#/components/schemas/CourseDay"
+        period:
+          type: integer
+        room:
+          type: string
+
+    CourseDay:
+      type: string
+      enum:
+        - Sun
+        - Mon
+        - Tue
+        - Wed
+        - Thu
+        - Fri
+        - Sat
+        - Intensive
+        - Appointment
+        - AnyTime
+        - Unknown
+
+    SchoolCalendarEvent:
+      type: object
+      required:
+        - date
+        - eventType
+        - description
+      properties:
+        date:
+          type: string
+          format: date
+        eventType:
+          type: "string"
+          enum:
+            - PublicHoliday
+            - Holiday
+            - Exam
+            - SubstituteDay
+            - Other
+        description:
+          type: string
+        changeTo:
+          $ref: "#/components/schemas/CourseDay"
+
+    SchoolCalendarModule:
+      type: object
+      required:
+        - year
+        - module
+        - start
+        - end
+      properties:
+        year:
+          type: integer
+          description: 年度
+        module:
+          type: string
+          enum:
+            - SpringA
+            - SpringB
+            - SpringC
+            - SummerVacation
+            - FallA
+            - FallB
+            - FallC
+            - SpringVacation
+        start:
+          type: string
+          format: date
+        end:
+          type: string
+          format: date
+
+    Course:
+      type: object
+      required:
+        - id
+        - year
+        - code
+        - name
+        - instructor
+        - credit
+        - overview
+        - remarks
+        - recommendedGrades
+        - methods
+        - schedules
+        - isAnnual
+        - hasParseError
+      properties:
+        id:
+          type: string
+          format: uuid
+        year:
+          type: integer
+        code:
+          type: string
+        name:
+          type: string
+        instructor:
+          type: string
+        credit:
+          type: number
+        overview:
+          type: string
+        remarks:
+          type: string
+        recommendedGrades:
+          type: array
+          items:
+            type: integer
+        methods:
+          type: array
+          items:
+            $ref: "#/components/schemas/CourseMethod"
+        schedules:
+          type: array
+          items:
+            $ref: "#/components/schemas/CourseSchedule"
+        isAnnual:
+          type: boolean
+        hasParseError:
+          type: boolean
+
+    RegisteredCourse:
+      allOf:
+        - type: object
+          required:
+            - id
+            - userId
+          properties:
+            id:
+              type: string
+              format: uuid
+            userId:
+              type: string
+              format: uuid
+            course:
+              $ref: "#/components/schemas/Course"
+        - $ref: "#/components/schemas/RegisteredCourseWithoutID"
+
+    # TODO 時間割クエリ周りは OAS 3.1でenumをkeyとするmapが作れるようになるので簡略化する
+    # https://stackoverflow.com/questions/46552863/how-to-write-openapi-3-swagger-specification-for-property-name-in-map-object/46553255#46553255
+    SearchCourseTimetableQuery:
+      type: object
+      properties:
+        SpringA:
+          $ref: "#/components/schemas/SearchCourseTimetableQueryDays"
+        SpringB:
+          $ref: "#/components/schemas/SearchCourseTimetableQueryDays"
+        SpringC:
+          $ref: "#/components/schemas/SearchCourseTimetableQueryDays"
+        FallA:
+          $ref: "#/components/schemas/SearchCourseTimetableQueryDays"
+        FallB:
+          $ref: "#/components/schemas/SearchCourseTimetableQueryDays"
+        FallC:
+          $ref: "#/components/schemas/SearchCourseTimetableQueryDays"
+        SummerVacation:
+          $ref: "#/components/schemas/SearchCourseTimetableQueryDays"
+        SpringVacation:
+          $ref: "#/components/schemas/SearchCourseTimetableQueryDays"
+
+    SearchCourseTimetableQueryDays:
+      type: object
+      properties:
+        Sun:
+          $ref: "#/components/schemas/SearchCourseTimetableQueryPeriods"
+        Mon:
+          $ref: "#/components/schemas/SearchCourseTimetableQueryPeriods"
+        Tue:
+          $ref: "#/components/schemas/SearchCourseTimetableQueryPeriods"
+        Wed:
+          $ref: "#/components/schemas/SearchCourseTimetableQueryPeriods"
+        Thu:
+          $ref: "#/components/schemas/SearchCourseTimetableQueryPeriods"
+        Fri:
+          $ref: "#/components/schemas/SearchCourseTimetableQueryPeriods"
+        Sat:
+          $ref: "#/components/schemas/SearchCourseTimetableQueryPeriods"
+        Intensive:
+          $ref: "#/components/schemas/SearchCourseTimetableQueryPeriods"
+        Appointment:
+          $ref: "#/components/schemas/SearchCourseTimetableQueryPeriods"
+        AnyTime:
+          $ref: "#/components/schemas/SearchCourseTimetableQueryPeriods"
+
+    SearchCourseTimetableQueryPeriods:
+      type: object
+      description: 指定しなかった場合はfalseとみなされます
+      properties:
+        0:
+          description: 時限が不明な授業は0になっているためそれらも検索したい場合はtrueに（集中授業に多い）
+          type: boolean
+        1:
+          type: boolean
+        2:
+          type: boolean
+        3:
+          type: boolean
+        4:
+          type: boolean
+        5:
+          type: boolean
+        6:
+          type: boolean
+        7:
+          type: boolean
+        8:
+          type: boolean
+
+    RegisteredCourseWithoutID:
+      type: object
+      required:
+        - year
+        - memo
+        - attendance
+        - absence
+        - late
+        - tags
+      properties:
+        year:
+          type: integer
+        name:
+          type: string
+        instructor:
+          type: string
+        credit:
+          type: number
+        methods:
+          type: array
+          items:
+            $ref: "#/components/schemas/CourseMethod"
+        schedules:
+          type: array
+          items:
+            $ref: "#/components/schemas/CourseSchedule"
+        memo:
+          type: string
+        attendance:
+          type: integer
+        absence:
+          type: integer
+        late:
+          type: integer
+        tags:
+          type: array
+          items:
+            $ref: "#/components/schemas/TagIdOnly"
+
+    Tag:
+      type: object
+      required:
+        - id
+        - userId
+        - name
+      properties:
+        id:
+          type: string
+          format: uuid
+        userId:
+          type: string
+          format: uuid
+        name:
+          type: string
+        position:
+          type: integer
+          minimum: 0
+
+    TagPositionOnly:
+      type: object
+      required:
+        - id
+        - position
+      properties:
+        id:
+          type: string
+          format: uuid
+        position:
+          type: integer
+          minimum: 0
+
+    TagIdOnly:
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          type: string
+          format: uuid
+
+    User:
+      type: object
+      required:
+        - id
+        - name
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+
+    Payment:
+      type: object
+      required:
+        - id
+        - type
+        - status
+        - amount
+        - created
+      properties:
+        id:
+          type: string
+        type:
+          type: string
+          enum:
+            - OneTime
+            - Subscription
+        status:
+          type: string
+          enum:
+            - Succeeded
+            - Canceled
+            - Pending
+        amount:
+          type: integer
+        created:
+          type: string
+          format: date
+
+    Subscription:
+      type: object
+      required:
+        - id
+        - status
+        - plans
+        - created
+      properties:
+        id:
+          type: string
+        status:
+          type: string
+          enum:
+            - Active
+            - Canceled
+        plans:
+          type: array
+          items:
+            type: object
+            required:
+              - id
+              - name
+              - amount
+            properties:
+              id:
+                type: string
+              name:
+                type: string
+              amount:
+                type: integer
+        created:
+          type: string
+          format: date
+
+    PaymentUser:
+      type: object
+      required:
+        - paymentUserId
+        - twinteUserId
+      properties:
+        paymentUserId:
+          type: string
+        twinteUserId:
+          type: string
+          format: uuid
+        displayName:
+          type: string
+        link:
+          type: string
+
+    Information:
+      type: object
+      required:
+        - id
+        - title
+        - content
+        - publishedAt
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        content:
+          type: string
+        publishedAt:
+          type: string
+          format: date-time
+        read:
+          type: boolean
+
+    Error:
+      type: object
+      required:
+        - message
+        - errors
+      properties:
+        message:
+          type: string
+        errors:
+          type: array
+          items:
+            type: object
+
+  responses:
+    BadRequestError:
+      description: リクエストに問題があった
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    UnauthorizedError:
+      description: 未認証
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    NotFoundError:
+      description: 指定されたデータが見つからなかった
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    InternalServerError:
+      description: サーバー側で問題が発生した
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: twinte_session

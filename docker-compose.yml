@@ -1,0 +1,37 @@
+version: '3'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: dev
+    container_name: twinte-back
+    env_file:
+      .env
+    volumes:
+      - .:/usr/src/app
+    ports:
+      - 8080:8080
+    depends_on:
+      - db
+    networks:
+      - twinte-network
+  db:
+    image: postgres:15
+    container_name: twinte-db
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: password
+      POSTGRES_USER: postgres
+    ports:
+      - 5432:5432
+    networks:
+      - twinte-network
+    volumes:
+      - ./docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
+
+networks:
+  twinte-network:
+    name: twinte-network
+    driver: bridge
