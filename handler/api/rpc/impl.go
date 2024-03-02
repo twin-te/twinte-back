@@ -55,6 +55,7 @@ func New(
 	timetableUseCase timetablemodule.UseCase,
 ) *impl {
 	h := new(impl)
+	h.pattenToHandler = make(map[string]http.Handler)
 
 	handlerOptions := []connect.HandlerOption{
 		connect.WithInterceptors(interceptor.NewErrorInterceptor(), interceptor.NewAuthInterceptor(accessController)),
