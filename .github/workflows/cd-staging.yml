@@ -1,0 +1,24 @@
+name: CD(staging)
+on: # 検証用。マージ時に修正する。
+  push:
+    branches:
+      - feature/staging
+  workflow_dispatch:
+
+jobs:
+  push-image:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Set Tag Name
+        run: echo "TAG_NAME=ghcr.io/twin-te/twinte-back:sha-${GITHUB_SHA}" >> $GITHUB_ENV
+      - name: Build
+        run: docker build -f deploy.Dockerfile -t $TAG_NAME .
+      - name: Push
+        run: docker push $TAG_NAME
