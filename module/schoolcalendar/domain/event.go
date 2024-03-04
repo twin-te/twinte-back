@@ -137,7 +137,7 @@ func ParseEvent(id int, eventType string, date string, description string, chang
 				return errors.New("field 'ChangeTo' must not be nil for substitute event")
 			}
 
-			*e.ChangeTo, err = ParseWeekday(*changeTo)
+			e.ChangeTo, err = base.ToPtrWithErr(ParseWeekday(*changeTo))
 			if err != nil {
 				return
 			}

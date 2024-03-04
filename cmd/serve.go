@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"context"
 	"log"
 	"net/http"
 	"time"
@@ -46,6 +47,15 @@ var serveCmd = &cobra.Command{
 		announcementRepository := announcementrepository.New(db)
 		announcementUsecase := announcementusecase.New(accessController, announcementFactory, announcementRepository)
 
+		announcements, err := announcementrepository.LoadAnnouncements()
+		if err != nil {
+			log.Fatalln(err)
+		}
+		err = announcementRepository.CreateAnnouncements(context.Background(), announcements...)
+		if err != nil {
+			log.Fatalln(err)
+		}
+
 		var dummyDonationUseCase donationmodule.UseCase
 		// donationFactory := donationfactory.New()
 		// donationGateway := donationgateway.New()
@@ -54,6 +64,24 @@ var serveCmd = &cobra.Command{
 
 		schoolcalendarRepository := schoolcalendarrepository.New()
 		schoolcalendarUseCase := schoolcalendarusecase.New(accessController, schoolcalendarRepository)
+
+		events, err := schoolcalendarrepository.LoadEvents()
+		if err != nil {
+			log.Fatalln(err)
+		}
+		err = schoolcalendarRepository.CreateEvents(context.Background(), events...)
+		if err != nil {
+			log.Fatalln(err)
+		}
+
+		moduleDetails, err := schoolcalendarrepository.LoadModuleDetails()
+		if err != nil {
+			log.Fatalln(err)
+		}
+		err = schoolcalendarRepository.CreateModuleDetails(context.Background(), moduleDetails...)
+		if err != nil {
+			log.Fatalln(err)
+		}
 
 		timetableFactory := timetablefactory.New(db)
 		timetableGateWay := timetablegateway.New("")

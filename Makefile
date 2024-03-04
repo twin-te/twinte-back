@@ -28,7 +28,7 @@ migrate-create:
 
 # e.g. make migrate-up db_url=${DB_URL}
 migrate-up:
-	migrate -database ${db_url} -path ./db/migrations up;
+	migrate -database ${db_url} -path ./db/migrations up
 
 # e.g. make migrate-down db_url=${DB_URL}
 migrate-down:

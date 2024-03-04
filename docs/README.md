@@ -23,7 +23,7 @@ go run . serve
 ## Migration Tool
 [golang-migrate](https://github.com/golang-migrate/migrate)というツールを使用しています。
 
-Makefileで定義している主なコマンドは次の通りです。詳しくは`migrate --help`からご確認下さい。
+Makefileで定義している主なコマンドは次の通りです。詳しくは`Makefile`や`migrate --help`からご確認下さい。
 ```sh
 # Apply all up migrations
 make migrate-up db_url=${DB_URL}
@@ -51,3 +51,12 @@ go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@lat
 curl -L https://github.com/golang-migrate/migrate/releases/download/v4.15.2/migrate.linux-arm64.tar.gz | tar xvz
 mv ./migrate /usr/local/bin/
 ```
+
+## Environment Variables
+下記のコマンドを実行することで`.env`ファイルに定義されている環境変数を設定することができます。
+
+```sh
+export $(grep -v '^#' .env | xargs)
+```
+
+c.f. [Stack Overflow](https://stackoverflow.com/questions/19331497/set-environment-variables-from-file-of-key-value-pairs)
