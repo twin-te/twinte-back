@@ -1,6 +1,8 @@
 package calendarv1beta
 
-import "net/http"
+import (
+	"net/http"
+)
 
 var _ http.Handler = (*impl)(nil)
 

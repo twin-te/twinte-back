@@ -27,13 +27,13 @@ type impl struct {
 func (h *impl) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	switch {
 	case strings.HasPrefix(r.URL.Path, "/api/v3"):
-		http.StripPrefix("/api/v3", h.restv3Handler)
+		http.StripPrefix("/api/v3", h.restv3Handler).ServeHTTP(w, r)
 	case strings.HasPrefix(r.URL.Path, "/api"):
-		http.StripPrefix("/api", h.rpcHandler)
+		http.StripPrefix("/api", h.rpcHandler).ServeHTTP(w, r)
 	case strings.HasPrefix(r.URL.Path, "/auth/v3"):
-		http.StripPrefix("/auth/v3", h.authv3Handler)
+		http.StripPrefix("/auth/v3", h.authv3Handler).ServeHTTP(w, r)
 	case strings.HasPrefix(r.URL.Path, "/calendar/v1beta"):
-		http.StripPrefix("/calendar/v1beta", h.calendarv1betaHandler)
+		http.StripPrefix("/calendar/v1beta", h.calendarv1betaHandler).ServeHTTP(w, r)
 	default:
 		http.NotFound(w, r)
 	}

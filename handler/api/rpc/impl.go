@@ -54,7 +54,9 @@ func New(
 	schoolcalendarUseCase schoolcalendarmodule.UseCase,
 	timetableUseCase timetablemodule.UseCase,
 ) *impl {
-	h := new(impl)
+	h := &impl{
+		pattenToHandler: map[string]http.Handler{},
+	}
 
 	handlerOptions := []connect.HandlerOption{
 		connect.WithInterceptors(interceptor.NewErrorInterceptor(), interceptor.NewAuthInterceptor(accessController)),

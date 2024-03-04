@@ -29,12 +29,12 @@ func (r *impl) ListModuleDetails(ctx context.Context, conds schoolcalendarport.L
 }
 
 func (r *impl) CreateModuleDetails(ctx context.Context, moduleDetails ...*schoolcalendardomain.ModuleDetail) error {
-	ids := base.Map(moduleDetails, func(event *schoolcalendardomain.ModuleDetail) idtype.ModuleDetailID {
-		return event.ID
+	ids := base.Map(moduleDetails, func(moduleDetail *schoolcalendardomain.ModuleDetail) idtype.ModuleDetailID {
+		return moduleDetail.ID
 	})
 
-	savedIDs := base.Map(r.moduleDetails, func(event *schoolcalendardomain.ModuleDetail) idtype.ModuleDetailID {
-		return event.ID
+	savedIDs := base.Map(r.moduleDetails, func(moduleDetail *schoolcalendardomain.ModuleDetail) idtype.ModuleDetailID {
+		return moduleDetail.ID
 	})
 
 	intersect := lo.Intersect(ids, savedIDs)
