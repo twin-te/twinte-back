@@ -27,7 +27,7 @@ func (r *impl) FindAlreadyRead(ctx context.Context, conds announcementport.FindA
 		})
 	}
 
-	var dbAlreadyRead *model.AlreadyRead
+	dbAlreadyRead := new(model.AlreadyRead)
 	if err := db.Take(dbAlreadyRead).Error; err != nil {
 		return nil, dbhelper.ConvertErrRecordNotFound(err)
 	}

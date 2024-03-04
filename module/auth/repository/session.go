@@ -28,7 +28,7 @@ func (r *impl) FindSession(ctx context.Context, conds authport.FindSessionConds,
 		})
 	}
 
-	var dbSession *model.Session
+	dbSession := new(model.Session)
 	if err := db.Take(dbSession).Error; err != nil {
 		return nil, dbhelper.ConvertErrRecordNotFound(err)
 	}

@@ -29,7 +29,7 @@ func (r *impl) FindRegisteredCourse(ctx context.Context, conds timetableport.Fin
 		Table:    clause.Table{Name: clause.CurrentTable},
 	})
 
-	var dbRegisteredCourse *model.RegisteredCourse
+	dbRegisteredCourse := new(model.RegisteredCourse)
 
 	err := db.Transaction(func(tx *gorm.DB) error {
 		err := tx.Preload("Tags").Take(dbRegisteredCourse).Error

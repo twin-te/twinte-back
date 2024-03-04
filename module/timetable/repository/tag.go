@@ -29,7 +29,7 @@ func (r *impl) FindTag(ctx context.Context, conds timetableport.FindTagConds, lo
 		})
 	}
 
-	var dbTag *model.Tag
+	dbTag := new(model.Tag)
 	if err := db.Take(&dbTag).Error; err != nil {
 		return nil, dbhelper.ConvertErrRecordNotFound(err)
 	}

@@ -21,7 +21,7 @@ func (r *impl) FindUser(ctx context.Context, conds authport.FindUserConds, lock 
 		return nil, err
 	}
 
-	var dbUser *model.User
+	dbUser := new(model.User)
 	err := r.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
 		if conds.ID != nil {
 			tx = tx.Where("id = ?", conds.ID.String())

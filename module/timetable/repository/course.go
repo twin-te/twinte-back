@@ -17,7 +17,7 @@ import (
 )
 
 func (r *impl) FindCourse(ctx context.Context, conds timetableport.FindCourseConds, lock sharedport.Lock) (*timetabledomain.Course, error) {
-	var dbCourse *model.Course
+	dbCourse := new(model.Course)
 
 	err := r.db.Transaction(func(tx *gorm.DB) error {
 		err := tx.
@@ -31,7 +31,7 @@ func (r *impl) FindCourse(ctx context.Context, conds timetableport.FindCourseCon
 			Preload("RecommendedGrades").
 			Preload("Methods").
 			Preload("Schedules").
-			Take(&dbCourse).
+			Take(dbCourse).
 			Error
 		return dbhelper.ConvertErrRecordNotFound(err)
 	}, nil)
