@@ -9,16 +9,27 @@ jobs:
   push-image:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Docker meta
+        id: docker_meta
+        uses: docker/metadata-action@v4
+        with:
+          images: ghcr.io/twin-te/twinte-back
+          tags: |
+            dev
       - name: Login to GitHub Container Registry
         uses: docker/login-action@v2
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Set Tag Name
-        run: echo "TAG_NAME=ghcr.io/twin-te/twinte-back:sha-${GITHUB_SHA}" >> $GITHUB_ENV
-      - name: Build
-        run: docker build -f deploy.Dockerfile -t $TAG_NAME .
-      - name: Push
-        run: docker push $TAG_NAME
+      - name: Build and push
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: deploy.Dockerfile
+          push: true
+          tags: ${{ steps.docker_meta.outputs.tags }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
