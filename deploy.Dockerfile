@@ -10,6 +10,11 @@ RUN go build -trimpath -ldflags "-w -s" -o app
 
 FROM debian:bullseye-slim
 
+RUN apt-get update \
+  && DEBIAN_FRONTEND=noninteractive apt-get install -yq ca-certificates openssl \
+  && apt-get clean \
+  && rm -rf /var/lib/apt/lists/*
+
 COPY --from=builder /app/app .
 
 EXPOSE 8080
