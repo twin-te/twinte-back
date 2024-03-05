@@ -6,7 +6,6 @@ require (
 	cloud.google.com/go v0.112.1
 	github.com/bufbuild/connect-go v1.10.0
 	github.com/getkin/kin-openapi v0.123.0
-	github.com/golang-jwt/jwt/v5 v5.2.0
 	github.com/google/uuid v1.6.0
 	github.com/labstack/echo/v4 v4.11.4
 	github.com/oapi-codegen/runtime v1.1.1
@@ -19,10 +18,10 @@ require (
 	golang.org/x/sync v0.6.0
 	google.golang.org/api v0.167.0
 	google.golang.org/protobuf v1.32.0
-	gorm.io/driver/postgres v1.5.6
+	gorm.io/driver/postgres v1.5.4
 	gorm.io/gen v0.3.25
-	gorm.io/gorm v1.25.7
-	gorm.io/plugin/dbresolver v1.5.1
+	gorm.io/gorm v1.25.6
+	gorm.io/plugin/dbresolver v1.5.0
 )
 
 require (

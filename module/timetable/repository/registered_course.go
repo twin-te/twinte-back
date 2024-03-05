@@ -3,6 +3,7 @@ package timetablerepository
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 
 	"github.com/samber/lo"
 	"github.com/twin-te/twinte-back/base"
@@ -200,7 +201,7 @@ func fromDBRegisteredCourse(dbRegisteredCourse *model.RegisteredCourse) (*timeta
 		registeredCourse.Instructors = dbRegisteredCourse.Instractor
 
 		if dbRegisteredCourse.Credit != nil {
-			credit, err := timetabledomain.ParseCredit(*dbRegisteredCourse.Credit)
+			credit, err := timetabledomain.ParseCredit(fmt.Sprintf("%.1f", *dbRegisteredCourse.Credit))
 			if err != nil {
 				return err
 			}
@@ -267,7 +268,7 @@ func toDBRegisteredCourse(registeredCourse *timetabledomain.RegisteredCourse, wi
 	}
 
 	if registeredCourse.Credit != nil {
-		dbRegisteredCourse.Credit = lo.ToPtr(registeredCourse.Credit.String())
+		dbRegisteredCourse.Credit = lo.ToPtr(registeredCourse.Credit.Float())
 	}
 
 	if registeredCourse.Methods != nil {

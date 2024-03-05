@@ -2,6 +2,7 @@ package timetablerepository
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/samber/lo"
 	"github.com/twin-te/twinte-back/base"
@@ -177,7 +178,7 @@ func fromDBCourse(dbCourse *model.Course) (*timetabledomain.Course, error) {
 
 		c.Instructors = dbCourse.Instructor
 
-		c.Credit, err = timetabledomain.ParseCredit(dbCourse.Credit)
+		c.Credit, err = timetabledomain.ParseCredit(fmt.Sprintf("%.1f", dbCourse.Credit))
 		if err != nil {
 			return err
 		}
@@ -211,7 +212,7 @@ func toDBCourse(course *timetabledomain.Course, withAssociations bool) *model.Co
 		Code:          course.Code.String(),
 		Name:          course.Name.String(),
 		Instructor:    course.Instructors,
-		Credit:        course.Credit.String(),
+		Credit:        course.Credit.Float(),
 		Overview:      course.Overview,
 		Remarks:       course.Remarks,
 		LastUpdate:    course.LastUpdatedAt,

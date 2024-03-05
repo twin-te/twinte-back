@@ -17,7 +17,7 @@ type Course struct {
 	Code              string                   `gorm:"column:code;type:text;not null;uniqueIndex:IDX_68ca51dc447bc2c03d5f1c44b8,priority:2" json:"code"`
 	Name              string                   `gorm:"column:name;type:text;not null" json:"name"`
 	Instructor        string                   `gorm:"column:instructor;type:text;not null" json:"instructor"`
-	Credit            string                   `gorm:"column:credit;type:numeric;not null" json:"credit"`
+	Credit            float64                  `gorm:"column:credit;type:numeric;not null" json:"credit"`
 	Overview          string                   `gorm:"column:overview;type:text;not null" json:"overview"`
 	Remarks           string                   `gorm:"column:remarks;type:text;not null" json:"remarks"`
 	LastUpdate        time.Time                `gorm:"column:last_update;type:timestamp with time zone;not null" json:"last_update"`

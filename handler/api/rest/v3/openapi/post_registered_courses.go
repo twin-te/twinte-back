@@ -1,6 +1,8 @@
 package openapi
 
-import "encoding/json"
+import (
+	"encoding/json"
+)
 
 func FromRegisteredCourse(registeredCourse RegisteredCourse) (res PostRegisteredCourses200JSONResponse, err error) {
 	res.union, err = json.Marshal(registeredCourse)
@@ -10,6 +12,10 @@ func FromRegisteredCourse(registeredCourse RegisteredCourse) (res PostRegistered
 func FromRegisteredCourses(registeredCourses []RegisteredCourse) (res PostRegisteredCourses200JSONResponse, err error) {
 	res.union, err = json.Marshal(registeredCourses)
 	return
+}
+
+func (body *PostRegisteredCoursesJSONRequestBody) UnmarshalJSON(data []byte) error {
+	return json.Unmarshal(data, &body.union)
 }
 
 func ToPostRegisteredCoursesJSONBody0(reqBody *PostRegisteredCoursesJSONRequestBody) (ret PostRegisteredCoursesJSONBody0, err error) {

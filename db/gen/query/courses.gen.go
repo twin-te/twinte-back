@@ -32,7 +32,7 @@ func newCourse(db *gorm.DB, opts ...gen.DOOption) course {
 	_course.Code = field.NewString(tableName, "code")
 	_course.Name = field.NewString(tableName, "name")
 	_course.Instructor = field.NewString(tableName, "instructor")
-	_course.Credit = field.NewString(tableName, "credit")
+	_course.Credit = field.NewFloat64(tableName, "credit")
 	_course.Overview = field.NewString(tableName, "overview")
 	_course.Remarks = field.NewString(tableName, "remarks")
 	_course.LastUpdate = field.NewTime(tableName, "last_update")
@@ -53,7 +53,7 @@ type course struct {
 	Code          field.String
 	Name          field.String
 	Instructor    field.String
-	Credit        field.String
+	Credit        field.Float64
 	Overview      field.String
 	Remarks       field.String
 	LastUpdate    field.Time
@@ -80,7 +80,7 @@ func (c *course) updateTableName(table string) *course {
 	c.Code = field.NewString(table, "code")
 	c.Name = field.NewString(table, "name")
 	c.Instructor = field.NewString(table, "instructor")
-	c.Credit = field.NewString(table, "credit")
+	c.Credit = field.NewFloat64(table, "credit")
 	c.Overview = field.NewString(table, "overview")
 	c.Remarks = field.NewString(table, "remarks")
 	c.LastUpdate = field.NewTime(table, "last_update")

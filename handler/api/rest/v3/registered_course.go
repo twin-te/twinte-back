@@ -191,7 +191,7 @@ func (h *impl) postRegisteredCourses2(ctx context.Context, reqBody openapi.PostR
 // 講義を登録する
 // (POST /registered-courses)
 func (h *impl) PostRegisteredCourses(ctx context.Context, request openapi.PostRegisteredCoursesRequestObject) (openapi.PostRegisteredCoursesResponseObject, error) {
-	if reqBody, err := openapi.ToPostRegisteredCoursesJSONBody0(request.Body); err != nil {
+	if reqBody, err := openapi.ToPostRegisteredCoursesJSONBody0(request.Body); err == nil {
 		apiRegisteredCourse, err := h.postRegisteredCourses0(ctx, reqBody)
 		if err != nil {
 			return nil, err
@@ -199,7 +199,7 @@ func (h *impl) PostRegisteredCourses(ctx context.Context, request openapi.PostRe
 		return openapi.FromRegisteredCourse(apiRegisteredCourse)
 	}
 
-	if reqBody, err := openapi.ToPostRegisteredCoursesJSONBody1(request.Body); err != nil {
+	if reqBody, err := openapi.ToPostRegisteredCoursesJSONBody1(request.Body); err == nil {
 		apiRegisteredCourses, err := h.postRegisteredCourses1(ctx, reqBody)
 		if err != nil {
 			return nil, err
@@ -207,7 +207,7 @@ func (h *impl) PostRegisteredCourses(ctx context.Context, request openapi.PostRe
 		return openapi.FromRegisteredCourses(apiRegisteredCourses)
 	}
 
-	if reqBody, err := openapi.ToPostRegisteredCoursesJSONBody2(request.Body); err != nil {
+	if reqBody, err := openapi.ToPostRegisteredCoursesJSONBody2(request.Body); err == nil {
 		apiRegisteredCourse, err := h.postRegisteredCourses2(ctx, reqBody)
 		if err != nil {
 			return nil, err

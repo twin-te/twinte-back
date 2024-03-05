@@ -121,3 +121,13 @@ func (h *impl) handleIDTokenGoogle(c echo.Context) error {
 
 	return c.Redirect(http.StatusFound, appenv.AUTH_REDIRECT_URL)
 }
+
+func (h *impl) handleLogout(c echo.Context) error {
+	if err := h.authUseCase.Logout(c.Request().Context()); err != nil {
+		return err
+	}
+
+	clearSessionCookie(c)
+
+	return c.Redirect(http.StatusFound, appenv.AUTH_REDIRECT_URL)
+}

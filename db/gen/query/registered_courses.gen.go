@@ -33,7 +33,7 @@ func newRegisteredCourse(db *gorm.DB, opts ...gen.DOOption) registeredCourse {
 	_registeredCourse.CourseID = field.NewString(tableName, "course_id")
 	_registeredCourse.Name = field.NewString(tableName, "name")
 	_registeredCourse.Instractor = field.NewString(tableName, "instractor")
-	_registeredCourse.Credit = field.NewString(tableName, "credit")
+	_registeredCourse.Credit = field.NewFloat64(tableName, "credit")
 	_registeredCourse.Methods = field.NewField(tableName, "methods")
 	_registeredCourse.Schedules = field.NewBytes(tableName, "schedules")
 	_registeredCourse.Memo = field.NewString(tableName, "memo")
@@ -56,7 +56,7 @@ type registeredCourse struct {
 	CourseID   field.String
 	Name       field.String
 	Instractor field.String
-	Credit     field.String
+	Credit     field.Float64
 	Methods    field.Field
 	Schedules  field.Bytes
 	Memo       field.String
@@ -85,7 +85,7 @@ func (r *registeredCourse) updateTableName(table string) *registeredCourse {
 	r.CourseID = field.NewString(table, "course_id")
 	r.Name = field.NewString(table, "name")
 	r.Instractor = field.NewString(table, "instractor")
-	r.Credit = field.NewString(table, "credit")
+	r.Credit = field.NewFloat64(table, "credit")
 	r.Methods = field.NewField(table, "methods")
 	r.Schedules = field.NewBytes(table, "schedules")
 	r.Memo = field.NewString(table, "memo")

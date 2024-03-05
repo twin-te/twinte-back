@@ -14,14 +14,14 @@ type RegisteredCourse struct {
 	CourseID   *string               `gorm:"column:course_id;type:uuid;uniqueIndex:IDX_fbc9587b218000acc37d7c6385,priority:2" json:"course_id"`
 	Name       *string               `gorm:"column:name;type:text" json:"name"`
 	Instractor *string               `gorm:"column:instractor;type:text" json:"instractor"`
-	Credit     *string               `gorm:"column:credit;type:numeric" json:"credit"`
+	Credit     *float64              `gorm:"column:credit;type:numeric" json:"credit"`
 	Methods    *[]string             `gorm:"column:methods;type:registered_courses_methods_enum[]" json:"methods"`
 	Schedules  *[]byte               `gorm:"column:schedules;type:jsonb" json:"schedules"`
 	Memo       string                `gorm:"column:memo;type:text;not null" json:"memo"`
 	Attendance int32                 `gorm:"column:attendance;type:integer;not null" json:"attendance"`
 	Absence    int32                 `gorm:"column:absence;type:integer;not null" json:"absence"`
 	Late       int32                 `gorm:"column:late;type:integer;not null" json:"late"`
-	Tags       []RegisteredCourseTag `json:"tags"`
+	Tags       []RegisteredCourseTag `gorm:"foreignKey:RegisteredCourse;references:ID" json:"tags"`
 }
 
 // TableName RegisteredCourse's table name

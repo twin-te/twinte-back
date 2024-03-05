@@ -53,6 +53,9 @@ mv ./migrate /usr/local/bin/
 ```
 
 ## Environment Variables
+`.env.example`をご参照ください。
+
+### Export
 下記のコマンドを実行することで`.env`ファイルに定義されている環境変数を設定することができます。
 
 ```sh

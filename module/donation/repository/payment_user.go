@@ -25,7 +25,7 @@ func (r *impl) FindPaymentUser(ctx context.Context, conds donationport.FindPayme
 		})
 	}
 
-	var dbPaymentUser *model.PaymentUser
+	dbPaymentUser := new(model.PaymentUser)
 	if err := db.Take(&dbPaymentUser).Error; err != nil {
 		return nil, dbhelper.ConvertErrRecordNotFound(err)
 	}
