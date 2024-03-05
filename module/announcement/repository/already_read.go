@@ -17,7 +17,7 @@ import (
 func (r *impl) FindAlreadyRead(ctx context.Context, conds announcementport.FindAlreadyReadConds, lock sharedport.Lock) (*announcementdomain.AlreadyRead, error) {
 	db := r.db.
 		WithContext(ctx).
-		Where("user_id = ?", conds.UserID.String()).
+		Where("read_user = ?", conds.UserID.String()).
 		Where("information_id = ?", conds.AnnouncementID.String())
 
 	if lock != sharedport.LockNone {
@@ -39,7 +39,7 @@ func (r *impl) ListAlreadyReads(ctx context.Context, conds announcementport.List
 	db := r.db.WithContext(ctx)
 
 	if conds.UserID != nil {
-		db = db.Where("user_id = ?", conds.UserID.String())
+		db = db.Where("read_user = ?", conds.UserID.String())
 	}
 
 	if conds.AnnouncementIDs != nil {
