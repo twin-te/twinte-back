@@ -92,7 +92,7 @@ func fromDBAlreadyRead(dbAlreadyRead *model.AlreadyRead) (*announcementdomain.Al
 			return
 		}
 
-		ar.AnnouncementID, err = idtype.ParseAnnouncementID(dbAlreadyRead.ReadUser)
+		ar.AnnouncementID, err = idtype.ParseAnnouncementID(dbAlreadyRead.InformationID)
 		if err != nil {
 			return
 		}
