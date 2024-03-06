@@ -21,9 +21,19 @@ func (r *impl) ListModuleDetails(ctx context.Context, conds schoolcalendarport.L
 		})
 	}
 
-	moduleDetails = base.Map(moduleDetails, func(moduleDetail *schoolcalendardomain.ModuleDetail) *schoolcalendardomain.ModuleDetail {
-		return moduleDetail.Clone()
-	})
+	if conds.StartBeforeOrEqual != nil {
+		moduleDetails = lo.Filter(moduleDetails, func(moduleDetail *schoolcalendardomain.ModuleDetail, _ int) bool {
+			return moduleDetail.Start.Before(*conds.StartBeforeOrEqual) || moduleDetail.Start == *conds.StartBeforeOrEqual
+		})
+	}
+
+	if conds.EndAfterOrEqual != nil {
+		moduleDetails = lo.Filter(moduleDetails, func(moduleDetail *schoolcalendardomain.ModuleDetail, _ int) bool {
+			return moduleDetail.End.After(*conds.EndAfterOrEqual) || moduleDetail.End == *conds.EndAfterOrEqual
+		})
+	}
+
+	moduleDetails = base.MapByClone(moduleDetails)
 
 	return moduleDetails, nil
 }

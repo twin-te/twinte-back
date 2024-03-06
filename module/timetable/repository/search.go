@@ -22,39 +22,49 @@ func (r *impl) SearchCourses(ctx context.Context, conds timetableport.SearchCour
 	}
 
 	// Filter by keywords
-	courses = lo.Filter(courses, func(course *timetabledomain.Course, _ int) bool {
-		return lo.EveryBy(conds.Keywords, func(keyword string) bool {
-			return strings.Contains(course.Name.String(), keyword)
+	if len(conds.Keywords) != 0 {
+		courses = lo.Filter(courses, func(course *timetabledomain.Course, _ int) bool {
+			return lo.EveryBy(conds.Keywords, func(keyword string) bool {
+				return strings.Contains(course.Name.String(), keyword)
+			})
 		})
-	})
+	}
 
 	// Filter by code prefixes
-	courses = lo.Filter(courses, func(course *timetabledomain.Course, _ int) bool {
-		return lo.EveryBy(conds.CodePrefixes.Included, func(code string) bool {
-			return strings.HasPrefix(course.Name.String(), code)
+	if len(conds.CodePrefixes.Included) != 0 {
+		courses = lo.Filter(courses, func(course *timetabledomain.Course, _ int) bool {
+			return lo.EveryBy(conds.CodePrefixes.Included, func(code string) bool {
+				return strings.HasPrefix(course.Code.String(), code)
+			})
 		})
-	})
-	courses = lo.Filter(courses, func(course *timetabledomain.Course, _ int) bool {
-		return lo.EveryBy(conds.CodePrefixes.Excluded, func(code string) bool {
-			return !strings.HasPrefix(course.Name.String(), code)
+	}
+	if len(conds.CodePrefixes.Excluded) != 0 {
+		courses = lo.Filter(courses, func(course *timetabledomain.Course, _ int) bool {
+			return lo.EveryBy(conds.CodePrefixes.Excluded, func(code string) bool {
+				return !strings.HasPrefix(course.Code.String(), code)
+			})
 		})
-	})
+	}
 
 	// Filter by schedules
-	courses = lo.Filter(courses, func(course *timetabledomain.Course, _ int) bool {
-		return lo.EveryBy(conds.Schedules.FullyIncluded, func(s1 timetabledomain.Schedule) bool {
-			return lo.SomeBy(course.Schedules, func(s2 timetabledomain.Schedule) bool {
-				return s1.Module == s2.Module && s1.Day == s2.Day && s1.Period == s2.Period
+	if len(conds.Schedules.FullyIncluded) != 0 {
+		courses = lo.Filter(courses, func(course *timetabledomain.Course, _ int) bool {
+			return lo.EveryBy(course.Schedules, func(s1 timetabledomain.Schedule) bool {
+				return lo.SomeBy(conds.Schedules.FullyIncluded, func(s2 timetabledomain.Schedule) bool {
+					return s1.Module == s2.Module && s1.Day == s2.Day && s1.Period == s2.Period
+				})
 			})
 		})
-	})
-	courses = lo.Filter(courses, func(course *timetabledomain.Course, _ int) bool {
-		return lo.SomeBy(conds.Schedules.PartiallyOverlapped, func(s1 timetabledomain.Schedule) bool {
-			return lo.SomeBy(course.Schedules, func(s2 timetabledomain.Schedule) bool {
-				return s1.Module == s2.Module && s1.Day == s2.Day && s1.Period == s2.Period
+	}
+	if len(conds.Schedules.PartiallyOverlapped) != 0 {
+		courses = lo.Filter(courses, func(course *timetabledomain.Course, _ int) bool {
+			return lo.SomeBy(course.Schedules, func(s1 timetabledomain.Schedule) bool {
+				return lo.SomeBy(conds.Schedules.PartiallyOverlapped, func(s2 timetabledomain.Schedule) bool {
+					return s1.Module == s2.Module && s1.Day == s2.Day && s1.Period == s2.Period
+				})
 			})
 		})
-	})
+	}
 
 	// Apply offset
 	courses = courses[lo.Clamp(conds.Offset, 0, len(courses)):]

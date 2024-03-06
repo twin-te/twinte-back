@@ -470,21 +470,21 @@ func fromApiTimetableDay(q openapi.SearchCourseTimetableQueryDays, module timeta
 		ret = append(ret, schedules...)
 	}
 
-	if q.Intensive != nil {
+	if q.Intensive != nil && q.Intensive.N0 != nil && *q.Intensive.N0 {
 		ret = append(ret, timetabledomain.Schedule{
 			Module: module,
 			Day:    timetabledomain.DayIntensive,
 		})
 	}
 
-	if q.AnyTime != nil {
+	if q.AnyTime != nil && q.AnyTime.N0 != nil && *q.AnyTime.N0 {
 		ret = append(ret, timetabledomain.Schedule{
 			Module: module,
 			Day:    timetabledomain.DayAnyTime,
 		})
 	}
 
-	if q.Appointment != nil {
+	if q.Appointment != nil && q.Appointment.N0 != nil && *q.Appointment.N0 {
 		ret = append(ret, timetabledomain.Schedule{
 			Module: module,
 			Day:    timetabledomain.DayAppointment,

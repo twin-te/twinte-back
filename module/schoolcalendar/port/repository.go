@@ -31,5 +31,7 @@ type ListEventsConds struct {
 // ModuleDetail
 
 type ListModuleDetailsConds struct {
-	Year *shareddomain.AcademicYear
+	Year               *shareddomain.AcademicYear
+	StartBeforeOrEqual *civil.Date
+	EndAfterOrEqual    *civil.Date
 }

@@ -26,4 +26,12 @@ type UseCase interface {
 	//
 	// [Authentication] not required
 	GetModuleDetails(ctx context.Context, year shareddomain.AcademicYear) ([]*schoolcalendardomain.ModuleDetail, error)
+
+	// GetModuleByDate returns the module corresponding to the given date.
+	//
+	// [Authentication] not required
+	//
+	// [Error Code]
+	//   - shared.NotFound
+	GetModuleByDate(ctx context.Context, date civil.Date) (schoolcalendardomain.Module, error)
 }
