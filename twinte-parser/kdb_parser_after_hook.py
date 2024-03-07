@@ -53,7 +53,7 @@ class Course:
     remarks: str
     last_updated_at: str
     has_parse_error: bool
-    is_annual: str
+    is_annual: bool
     recommended_grades: list[int]
     methods: list[CourseMethod]
     schedules: list[Schedule]
