@@ -106,6 +106,11 @@ func (h *impl) DeleteTagsId(ctx context.Context, request openapi.DeleteTagsIdReq
 	}
 
 	err = h.timetableUseCase.DeleteTag(ctx, id)
+	if err != nil {
+		return
+	}
+
+	res = openapi.DeleteTagsId204Response{}
 
 	return
 }
