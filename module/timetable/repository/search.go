@@ -2,6 +2,7 @@ package timetablerepository
 
 import (
 	"context"
+	"sort"
 	"strings"
 	"sync"
 	"time"
@@ -65,6 +66,11 @@ func (r *impl) SearchCourses(ctx context.Context, conds timetableport.SearchCour
 			})
 		})
 	}
+
+	// Sort by code
+	sort.Slice(courses, func(i, j int) bool {
+		return courses[i].Code.String() < courses[j].Code.String()
+	})
 
 	// Apply offset
 	courses = courses[lo.Clamp(conds.Offset, 0, len(courses)):]
