@@ -14,12 +14,20 @@ import (
 )
 
 func (uc *impl) GetCoursesByIDs(ctx context.Context, ids []idtype.CourseID) ([]*timetabledomain.Course, error) {
+	if len(ids) == 0 {
+		return nil, nil
+	}
+
 	return uc.r.ListCourses(ctx, timetableport.ListCoursesConds{
 		IDs: &ids,
 	}, sharedport.LockNone)
 }
 
 func (uc *impl) GetCoursesByCodes(ctx context.Context, year shareddomain.AcademicYear, codes []timetabledomain.Code) ([]*timetabledomain.Course, error) {
+	if len(codes) == 0 {
+		return nil, nil
+	}
+
 	return uc.r.ListCourses(ctx, timetableport.ListCoursesConds{
 		Year:  &year,
 		Codes: &codes,
