@@ -15,8 +15,8 @@ type RegisteredCourse struct {
 	Name       *string               `gorm:"column:name;type:text" json:"name"`
 	Instractor *string               `gorm:"column:instractor;type:text" json:"instractor"`
 	Credit     *float64              `gorm:"column:credit;type:numeric" json:"credit"`
-	Methods    *[]string             `gorm:"column:methods;type:registered_courses_methods_enum[]" json:"methods"`
-	Schedules  *[]byte               `gorm:"column:schedules;type:jsonb" json:"schedules"`
+	Methods    *string               `gorm:"column:methods;type:registered_courses_methods_enum[]" json:"methods"`
+	Schedules  *string               `gorm:"column:schedules;type:jsonb" json:"schedules"`
 	Memo       string                `gorm:"column:memo;type:text;not null" json:"memo"`
 	Attendance int32                 `gorm:"column:attendance;type:integer;not null" json:"attendance"`
 	Absence    int32                 `gorm:"column:absence;type:integer;not null" json:"absence"`

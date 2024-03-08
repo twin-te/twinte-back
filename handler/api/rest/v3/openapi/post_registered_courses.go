@@ -1,6 +1,7 @@
 package openapi
 
 import (
+	"bytes"
 	"encoding/json"
 )
 
@@ -19,16 +20,22 @@ func (body *PostRegisteredCoursesJSONRequestBody) UnmarshalJSON(data []byte) err
 }
 
 func ToPostRegisteredCoursesJSONBody0(reqBody *PostRegisteredCoursesJSONRequestBody) (ret PostRegisteredCoursesJSONBody0, err error) {
-	err = json.Unmarshal(reqBody.union, &ret)
+	dec := json.NewDecoder(bytes.NewReader(reqBody.union))
+	dec.DisallowUnknownFields()
+	err = dec.Decode(&ret)
 	return
 }
 
 func ToPostRegisteredCoursesJSONBody1(reqBody *PostRegisteredCoursesJSONRequestBody) (ret PostRegisteredCoursesJSONBody1, err error) {
-	err = json.Unmarshal(reqBody.union, &ret)
+	dec := json.NewDecoder(bytes.NewReader(reqBody.union))
+	dec.DisallowUnknownFields()
+	err = dec.Decode(&ret)
 	return
 }
 
 func ToPostRegisteredCoursesJSONBody2(reqBody *PostRegisteredCoursesJSONRequestBody) (ret PostRegisteredCoursesJSONBody2, err error) {
-	err = json.Unmarshal(reqBody.union, &ret)
+	dec := json.NewDecoder(bytes.NewReader(reqBody.union))
+	dec.DisallowUnknownFields()
+	err = dec.Decode(&ret)
 	return
 }

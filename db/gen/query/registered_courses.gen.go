@@ -34,8 +34,8 @@ func newRegisteredCourse(db *gorm.DB, opts ...gen.DOOption) registeredCourse {
 	_registeredCourse.Name = field.NewString(tableName, "name")
 	_registeredCourse.Instractor = field.NewString(tableName, "instractor")
 	_registeredCourse.Credit = field.NewFloat64(tableName, "credit")
-	_registeredCourse.Methods = field.NewField(tableName, "methods")
-	_registeredCourse.Schedules = field.NewBytes(tableName, "schedules")
+	_registeredCourse.Methods = field.NewString(tableName, "methods")
+	_registeredCourse.Schedules = field.NewString(tableName, "schedules")
 	_registeredCourse.Memo = field.NewString(tableName, "memo")
 	_registeredCourse.Attendance = field.NewInt32(tableName, "attendance")
 	_registeredCourse.Absence = field.NewInt32(tableName, "absence")
@@ -57,8 +57,8 @@ type registeredCourse struct {
 	Name       field.String
 	Instractor field.String
 	Credit     field.Float64
-	Methods    field.Field
-	Schedules  field.Bytes
+	Methods    field.String
+	Schedules  field.String
 	Memo       field.String
 	Attendance field.Int32
 	Absence    field.Int32
@@ -86,8 +86,8 @@ func (r *registeredCourse) updateTableName(table string) *registeredCourse {
 	r.Name = field.NewString(table, "name")
 	r.Instractor = field.NewString(table, "instractor")
 	r.Credit = field.NewFloat64(table, "credit")
-	r.Methods = field.NewField(table, "methods")
-	r.Schedules = field.NewBytes(table, "schedules")
+	r.Methods = field.NewString(table, "methods")
+	r.Schedules = field.NewString(table, "schedules")
 	r.Memo = field.NewString(table, "memo")
 	r.Attendance = field.NewInt32(table, "attendance")
 	r.Absence = field.NewInt32(table, "absence")

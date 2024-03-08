@@ -25,18 +25,6 @@ func main() {
 	}
 	g.UseDB(db)
 
-	var dataMap = map[string]func(gorm.ColumnType) (dataType string){
-		"jsonb": func(columnType gorm.ColumnType) (dataType string) {
-			return "[]byte"
-		},
-
-		"registered_courses_methods_enum[]": func(columnType gorm.ColumnType) (dataType string) {
-			return "[]string"
-		},
-	}
-
-	g.WithDataTypeMap(dataMap)
-
 	g.ApplyBasic(g.GenerateAllTable()...)
 
 	g.ApplyBasic(

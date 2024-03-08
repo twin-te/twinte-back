@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"strings"
 
 	"github.com/samber/lo"
 	"github.com/twin-te/twinte-back/base"
@@ -209,7 +210,7 @@ func fromDBRegisteredCourse(dbRegisteredCourse *model.RegisteredCourse) (*timeta
 		}
 
 		if dbRegisteredCourse.Methods != nil {
-			methods, err := base.MapWithErr(*dbRegisteredCourse.Methods, timetabledomain.ParseCourseMethod)
+			methods, err := fromDBRegisteredCourseMethods(*dbRegisteredCourse.Methods)
 			if err != nil {
 				return err
 			}
@@ -272,7 +273,7 @@ func toDBRegisteredCourse(registeredCourse *timetabledomain.RegisteredCourse, wi
 	}
 
 	if registeredCourse.Methods != nil {
-		dbRegisteredCourse.Methods = lo.ToPtr(base.MapByString(*registeredCourse.Methods))
+		dbRegisteredCourse.Methods = lo.ToPtr(toDBRegisteredCourseMethods(*registeredCourse.Methods))
 	}
 
 	if registeredCourse.Schedules != nil {
@@ -297,10 +298,20 @@ type dbRegisteredCourseSchedule struct {
 	Room   string `json:"room"`
 }
 
-func fromDBRegisteredCourseSchedules(data []byte) ([]timetabledomain.Schedule, error) {
+func fromDBRegisteredCourseMethods(dbMethods string) ([]timetabledomain.CourseMethod, error) {
+	dbMethods = strings.TrimPrefix(dbMethods, "{")
+	dbMethods = strings.TrimSuffix(dbMethods, "}")
+	return base.MapWithErr(strings.Split(dbMethods, ","), timetabledomain.ParseCourseMethod)
+}
+
+func toDBRegisteredCourseMethods(methods []timetabledomain.CourseMethod) string {
+	return fmt.Sprintf("{%s}", strings.Join(base.MapByString(methods), ","))
+}
+
+func fromDBRegisteredCourseSchedules(data string) ([]timetabledomain.Schedule, error) {
 	var dbRegisteredCourseSchedules []dbRegisteredCourseSchedule
 
-	if err := json.Unmarshal(data, &dbRegisteredCourseSchedules); err != nil {
+	if err := json.Unmarshal([]byte(data), &dbRegisteredCourseSchedules); err != nil {
 		return nil, err
 	}
 
@@ -314,7 +325,7 @@ func fromDBRegisteredCourseSchedules(data []byte) ([]timetabledomain.Schedule, e
 	})
 }
 
-func toDBRegisteredCourseSchedulesJSON(schedules []timetabledomain.Schedule) ([]byte, error) {
+func toDBRegisteredCourseSchedulesJSON(schedules []timetabledomain.Schedule) (string, error) {
 	dbRegisteredCourseSchedules := base.Map(schedules, func(schedule timetabledomain.Schedule) *dbRegisteredCourseSchedule {
 		return &dbRegisteredCourseSchedule{
 			Module: schedule.Module.String(),
@@ -323,5 +334,11 @@ func toDBRegisteredCourseSchedulesJSON(schedules []timetabledomain.Schedule) ([]
 			Room:   schedule.Rooms,
 		}
 	})
-	return json.Marshal(dbRegisteredCourseSchedules)
+
+	data, err := json.Marshal(dbRegisteredCourseSchedules)
+	if err != nil {
+		return "", err
+	}
+
+	return string(data), nil
 }
