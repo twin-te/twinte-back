@@ -17,8 +17,9 @@ var (
 	TEST_DB_URL string = loadString("TEST_DB_URL")
 
 	// handler
-	ADDR              string = loadString("ADDR")
-	AUTH_REDIRECT_URL string = loadString("AUTH_REDIRECT_URL")
+	ADDR                 string   = loadString("ADDR")
+	AUTH_REDIRECT_URL    string   = loadString("AUTH_REDIRECT_URL")
+	CORS_ALLOWED_ORIGINS []string = loadStringSlice("CORS_ALLOWED_ORIGINS")
 
 	OAUTH2_GOOGLE_CLIENT_ID     string = loadString("OAUTH2_GOOGLE_CLIENT_ID")
 	OAUTH2_GOOGLE_CLIENT_SECRET string = loadString("OAUTH2_GOOGLE_CLIENT_SECRET")

@@ -4,28 +4,40 @@ import (
 	"fmt"
 	"os"
 	"strconv"
+	"strings"
 )
 
+func lookupEnvOrPanic(key string) string {
+	value, ok := os.LookupEnv(key)
+	if !ok {
+		panic(fmt.Errorf("please set environment variable %s", key))
+	}
+	return value
+}
+
 func loadBool(key string) bool {
-	ret, err := strconv.ParseBool(os.Getenv(key))
+	value := lookupEnvOrPanic(key)
+	ret, err := strconv.ParseBool(value)
 	if err != nil {
-		panic(fmt.Errorf("failed to load environment variable (%s) due to %w", key, err))
+		panic(fmt.Errorf("failed to parse environment variable (%s) due to %w", key, err))
 	}
 	return ret
 }
 
 func loadInt(key string) int {
-	ret, err := strconv.Atoi(os.Getenv(key))
+	value := lookupEnvOrPanic(key)
+	ret, err := strconv.Atoi(value)
 	if err != nil {
-		panic(fmt.Errorf("failed to load environment variable (%s) due to %w", key, err))
+		panic(fmt.Errorf("failed to parse environment variable (%s) due to %w", key, err))
 	}
 	return ret
 }
 
 func loadString(key string) string {
-	ret := os.Getenv(key)
-	if ret == "" {
-		panic(fmt.Errorf("failed to load environment variable (%s), please set it", key))
-	}
-	return ret
+	return lookupEnvOrPanic(key)
+}
+
+func loadStringSlice(key string) []string {
+	value := lookupEnvOrPanic(key)
+	return strings.Split(value, ",")
 }

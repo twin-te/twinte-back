@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/rs/cors"
 	"github.com/spf13/cobra"
 	"github.com/twin-te/twinte-back/appenv"
 	dbhelper "github.com/twin-te/twinte-back/db/helper"
@@ -98,7 +99,13 @@ var serveCmd = &cobra.Command{
 		)
 
 		mux := http.NewServeMux()
-		mux.Handle("/", h)
+		mux.Handle("/", cors.New(cors.Options{
+			AllowedOrigins:   appenv.CORS_ALLOWED_ORIGINS,
+			AllowedMethods:   []string{http.MethodGet, http.MethodPost, http.MethodPut, http.MethodPatch, http.MethodDelete},
+			AllowCredentials: true,
+		}).Handler(h))
+
+		log.Printf("listen and serve on %s\n", appenv.ADDR)
 
 		if err := http.ListenAndServe(appenv.ADDR, mux); err != nil {
 			log.Fatalln(err)
