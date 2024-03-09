@@ -106,6 +106,10 @@ func (r *impl) DeleteUsers(ctx context.Context, conds authport.DeleteUserConds) 
 		var dbUsers []*model.User
 		tx = tx.Model(&dbUsers)
 
+		if conds.ID != nil {
+			tx.Where("id = ?", conds.ID.String())
+		}
+
 		if err := tx.Clauses(clause.Returning{Columns: []clause.Column{{Name: "id"}}}).
 			Update(`"deletedAt"`, time.Now()).
 			Error; err != nil {
