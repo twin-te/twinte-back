@@ -299,8 +299,13 @@ type dbRegisteredCourseSchedule struct {
 }
 
 func fromDBRegisteredCourseMethods(dbMethods string) ([]timetabledomain.CourseMethod, error) {
+	if dbMethods == "{}" {
+		return nil, nil
+	}
+
 	dbMethods = strings.TrimPrefix(dbMethods, "{")
 	dbMethods = strings.TrimSuffix(dbMethods, "}")
+
 	return base.MapWithErr(strings.Split(dbMethods, ","), timetabledomain.ParseCourseMethod)
 }
 

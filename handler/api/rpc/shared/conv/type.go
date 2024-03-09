@@ -46,7 +46,7 @@ func ToPBRFC3339DateTime(t time.Time) *sharedpb.RFC3339DateTime {
 
 func FromPBRFC3339FullDate(pbFullDate *sharedpb.RFC3339FullDate) (civil.Date, error) {
 	if pbFullDate == nil {
-		return civil.Date{}, errors.New("full date time must be present")
+		return civil.Date{}, errors.New("full date must be present")
 	}
 	return civil.ParseDate(pbFullDate.Value)
 }
