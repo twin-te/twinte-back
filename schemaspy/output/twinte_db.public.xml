@@ -1,0 +1,274 @@
+<?xml version="1.0" encoding="UTF-8"?><database name="twinte_db" schema="public" type="PostgreSQL - 15.4 (Debian 15.4-1.pgdg120+1)">
+   <sequences>
+      <sequence increment="1" name="course_methods_id_seq" startValue="1"/>
+      <sequence increment="1" name="course_recommended_grades_id_seq" startValue="1"/>
+      <sequence increment="1" name="course_schedules_id_seq" startValue="1"/>
+      <sequence increment="1" name="user_authentications_id_seq" startValue="1"/>
+   </sequences>
+   <tables>
+      <table name="already_reads" remarks="" schema="public" type="TABLE">
+         <column autoUpdated="false" defaultValue="uuid_generate_v4()" digits="0" id="0" name="id" nullable="false" remarks="" size="2147483647" type="uuid" typeCode="1111"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="1" name="information_id" nullable="false" remarks="" size="2147483647" type="uuid" typeCode="1111"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="2" name="read_user" nullable="false" remarks="" size="2147483647" type="text" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="6" id="3" name="read_at" nullable="false" remarks="" size="29" type="timestamp" typeCode="93"/>
+         <primaryKey column="id" sequenceNumberInPK="1"/>
+         <index name="PK_7b7e4dc4f3dac9076561acd7832" unique="true">
+            <column ascending="true" name="id"/>
+         </index>
+      </table>
+      <table name="course_methods" remarks="" schema="public" type="TABLE">
+         <column autoUpdated="true" defaultValue="nextval('course_methods_id_seq'::regclass)" digits="0" id="0" name="id" nullable="false" remarks="" size="10" type="serial" typeCode="4"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="1" name="method" nullable="false" remarks="" size="2147483647" type="course_methods_method_enum" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="2" name="course_id" nullable="true" remarks="" size="2147483647" type="uuid" typeCode="1111">
+            <parent column="id" foreignKey="FK_b65806d6baf43fbfa16751d9d5c" implied="false" onDeleteCascade="false" schema="public" table="courses"/>
+         </column>
+         <primaryKey column="id" sequenceNumberInPK="1"/>
+         <index name="PK_412b40a7891d105d69847f77f72" unique="true">
+            <column ascending="true" name="id"/>
+         </index>
+      </table>
+      <table name="course_recommended_grades" remarks="" schema="public" type="TABLE">
+         <column autoUpdated="true" defaultValue="nextval('course_recommended_grades_id_seq'::regclass)" digits="0" id="0" name="id" nullable="false" remarks="" size="10" type="serial" typeCode="4"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="1" name="grade" nullable="false" remarks="" size="5" type="int2" typeCode="5"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="2" name="course_id" nullable="true" remarks="" size="2147483647" type="uuid" typeCode="1111">
+            <parent column="id" foreignKey="FK_54fbcd6eb4ed154ac8be7e7dc72" implied="false" onDeleteCascade="false" schema="public" table="courses"/>
+         </column>
+         <primaryKey column="id" sequenceNumberInPK="1"/>
+         <index name="PK_832c34a40a52a56375e2796b3c6" unique="true">
+            <column ascending="true" name="id"/>
+         </index>
+      </table>
+      <table name="course_schedules" remarks="" schema="public" type="TABLE">
+         <column autoUpdated="true" defaultValue="nextval('course_schedules_id_seq'::regclass)" digits="0" id="0" name="id" nullable="false" remarks="" size="10" type="serial" typeCode="4"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="1" name="module" nullable="false" remarks="" size="2147483647" type="course_schedules_module_enum" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="2" name="day" nullable="false" remarks="" size="2147483647" type="course_schedules_day_enum" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="3" name="period" nullable="false" remarks="" size="5" type="int2" typeCode="5"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="4" name="room" nullable="false" remarks="" size="2147483647" type="text" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="5" name="course_id" nullable="true" remarks="" size="2147483647" type="uuid" typeCode="1111">
+            <parent column="id" foreignKey="FK_f0cd61820798323cb06ca91105d" implied="false" onDeleteCascade="false" schema="public" table="courses"/>
+         </column>
+         <primaryKey column="id" sequenceNumberInPK="1"/>
+         <index name="PK_68118fc569f0c9ebb03fb79f80e" unique="true">
+            <column ascending="true" name="id"/>
+         </index>
+      </table>
+      <table name="courses" remarks="" schema="public" type="TABLE">
+         <column autoUpdated="false" defaultValue="uuid_generate_v4()" digits="0" id="0" name="id" nullable="false" remarks="" size="2147483647" type="uuid" typeCode="1111">
+            <child column="course_id" foreignKey="FK_b65806d6baf43fbfa16751d9d5c" implied="false" onDeleteCascade="false" schema="public" table="course_methods"/>
+            <child column="course_id" foreignKey="FK_54fbcd6eb4ed154ac8be7e7dc72" implied="false" onDeleteCascade="false" schema="public" table="course_recommended_grades"/>
+            <child column="course_id" foreignKey="FK_f0cd61820798323cb06ca91105d" implied="false" onDeleteCascade="false" schema="public" table="course_schedules"/>
+         </column>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="1" name="year" nullable="false" remarks="" size="5" type="int2" typeCode="5"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="2" name="code" nullable="false" remarks="" size="2147483647" type="text" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="3" name="name" nullable="false" remarks="" size="2147483647" type="text" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="4" name="instructor" nullable="false" remarks="" size="2147483647" type="text" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="5" name="credit" nullable="false" remarks="" size="0" type="numeric" typeCode="2"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="6" name="overview" nullable="false" remarks="" size="2147483647" type="text" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="7" name="remarks" nullable="false" remarks="" size="2147483647" type="text" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="6" id="8" name="last_update" nullable="false" remarks="" size="35" type="timestamptz" typeCode="93"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="9" name="has_parse_error" nullable="false" remarks="" size="1" type="bool" typeCode="-7"/>
+         <column autoUpdated="false" defaultValue="false" digits="0" id="10" name="is_annual" nullable="false" remarks="" size="1" type="bool" typeCode="-7"/>
+         <primaryKey column="id" sequenceNumberInPK="1"/>
+         <index name="PK_3f70a487cc718ad8eda4e6d58c9" unique="true">
+            <column ascending="true" name="id"/>
+         </index>
+         <index name="IDX_68ca51dc447bc2c03d5f1c44b8" unique="true">
+            <column ascending="true" name="year"/>
+            <column ascending="true" name="code"/>
+         </index>
+      </table>
+      <table name="payment_users" remarks="" schema="public" type="TABLE">
+         <column autoUpdated="false" defaultValue="null" digits="0" id="0" name="id" nullable="false" remarks="" size="2147483647" type="text" typeCode="12">
+            <child column="social_id" foreignKey="Implied Constraint" implied="true" onDeleteCascade="false" schema="public" table="user_authentications"/>
+         </column>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="1" name="twinte_user_id" nullable="false" remarks="" size="2147483647" type="uuid" typeCode="1111"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="2" name="display_name" nullable="true" remarks="" size="2147483647" type="text" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="3" name="link" nullable="true" remarks="" size="2147483647" type="text" typeCode="12"/>
+         <primaryKey column="id" sequenceNumberInPK="1"/>
+         <index name="PK_1438bd4715f036ae4353ae95505" unique="true">
+            <column ascending="true" name="id"/>
+         </index>
+      </table>
+      <table name="registered_course_tags" remarks="" schema="public" type="TABLE">
+         <column autoUpdated="false" defaultValue="null" digits="0" id="0" name="tag" nullable="false" remarks="" size="2147483647" type="uuid" typeCode="1111">
+            <parent column="id" foreignKey="FK_c102260e1ffed113fef8ead1481" implied="false" onDeleteCascade="true" schema="public" table="tags"/>
+         </column>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="1" name="registered_course" nullable="false" remarks="" size="2147483647" type="uuid" typeCode="1111">
+            <parent column="id" foreignKey="FK_41594bc21c7a7adff5f2a4574cc" implied="false" onDeleteCascade="true" schema="public" table="registered_courses"/>
+         </column>
+         <primaryKey column="tag" sequenceNumberInPK="1"/>
+         <primaryKey column="registered_course" sequenceNumberInPK="2"/>
+         <index name="PK_605d76e7c4a818b543daae4cdf2" unique="true">
+            <column ascending="true" name="tag"/>
+            <column ascending="true" name="registered_course"/>
+         </index>
+         <index name="IDX_41594bc21c7a7adff5f2a4574c" unique="false">
+            <column ascending="true" name="registered_course"/>
+         </index>
+         <index name="IDX_c102260e1ffed113fef8ead148" unique="false">
+            <column ascending="true" name="tag"/>
+         </index>
+      </table>
+      <table name="registered_courses" remarks="" schema="public" type="TABLE">
+         <column autoUpdated="false" defaultValue="null" digits="0" id="0" name="id" nullable="false" remarks="" size="2147483647" type="uuid" typeCode="1111">
+            <child column="registered_course" foreignKey="FK_41594bc21c7a7adff5f2a4574cc" implied="false" onDeleteCascade="true" schema="public" table="registered_course_tags"/>
+         </column>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="1" name="user_id" nullable="false" remarks="" size="2147483647" type="uuid" typeCode="1111"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="2" name="year" nullable="false" remarks="" size="5" type="int2" typeCode="5"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="3" name="course_id" nullable="true" remarks="" size="2147483647" type="uuid" typeCode="1111"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="4" name="name" nullable="true" remarks="" size="2147483647" type="text" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="5" name="instractor" nullable="true" remarks="" size="2147483647" type="text" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="6" name="credit" nullable="true" remarks="" size="0" type="numeric" typeCode="2"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="7" name="methods" nullable="true" remarks="" size="2147483647" type="_registered_courses_methods_enum" typeCode="2003"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="8" name="schedules" nullable="true" remarks="" size="2147483647" type="jsonb" typeCode="1111"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="9" name="memo" nullable="false" remarks="" size="2147483647" type="text" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="10" name="attendance" nullable="false" remarks="" size="10" type="int4" typeCode="4"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="11" name="absence" nullable="false" remarks="" size="10" type="int4" typeCode="4"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="12" name="late" nullable="false" remarks="" size="10" type="int4" typeCode="4"/>
+         <primaryKey column="id" sequenceNumberInPK="1"/>
+         <index name="PK_1aa4b72144999c7ac6f37e52fca" unique="true">
+            <column ascending="true" name="id"/>
+         </index>
+         <index name="IDX_fbc9587b218000acc37d7c6385" unique="true">
+            <column ascending="true" name="user_id"/>
+            <column ascending="true" name="course_id"/>
+         </index>
+      </table>
+      <table name="schema_migrations" remarks="" schema="public" type="TABLE">
+         <column autoUpdated="false" defaultValue="null" digits="0" id="0" name="version" nullable="false" remarks="" size="19" type="int8" typeCode="-5"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="1" name="dirty" nullable="false" remarks="" size="1" type="bool" typeCode="-7"/>
+         <primaryKey column="version" sequenceNumberInPK="1"/>
+         <index name="schema_migrations_pkey" unique="true">
+            <column ascending="true" name="version"/>
+         </index>
+      </table>
+      <table name="session" remarks="" schema="public" type="TABLE">
+         <column autoUpdated="false" defaultValue="null" digits="0" id="0" name="id" nullable="false" remarks="" size="2147483647" type="uuid" typeCode="1111"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="1" name="user_id" nullable="false" remarks="" size="2147483647" type="uuid" typeCode="1111"/>
+         <column autoUpdated="false" defaultValue="null" digits="3" id="2" name="expired_at" nullable="false" remarks="" size="26" type="timestamp" typeCode="93"/>
+         <primaryKey column="id" sequenceNumberInPK="1"/>
+         <index name="session_pkey" unique="true">
+            <column ascending="true" name="id"/>
+         </index>
+         <index name="session.id_expired_at_index" unique="false">
+            <column ascending="true" name="id"/>
+            <column ascending="true" name="expired_at"/>
+         </index>
+      </table>
+      <table name="tags" remarks="" schema="public" type="TABLE">
+         <column autoUpdated="false" defaultValue="null" digits="0" id="0" name="id" nullable="false" remarks="" size="2147483647" type="uuid" typeCode="1111">
+            <child column="tag" foreignKey="FK_c102260e1ffed113fef8ead1481" implied="false" onDeleteCascade="true" schema="public" table="registered_course_tags"/>
+         </column>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="1" name="user_id" nullable="false" remarks="" size="2147483647" type="uuid" typeCode="1111"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="2" name="name" nullable="false" remarks="" size="2147483647" type="text" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="3" name="position" nullable="false" remarks="" size="10" type="int4" typeCode="4"/>
+         <primaryKey column="id" sequenceNumberInPK="1"/>
+         <index name="PK_e7dc17249a1148a1970748eda99" unique="true">
+            <column ascending="true" name="id"/>
+         </index>
+         <index name="UQ_b861cf6ec9af09190780481a311" unique="true">
+            <column ascending="true" name="user_id"/>
+            <column ascending="true" name="position"/>
+         </index>
+      </table>
+      <table name="user_authentications" remarks="" schema="public" type="TABLE">
+         <column autoUpdated="true" defaultValue="nextval('user_authentications_id_seq'::regclass)" digits="0" id="0" name="id" nullable="false" remarks="" size="10" type="serial" typeCode="4"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="1" name="user_id" nullable="false" remarks="" size="2147483647" type="uuid" typeCode="1111">
+            <parent column="id" foreignKey="user_authentications_user_id_fkey" implied="false" onDeleteCascade="false" schema="public" table="users"/>
+         </column>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="2" name="provider" nullable="false" remarks="" size="2147483647" type="user_authentications_provider_enum" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="3" name="social_id" nullable="false" remarks="" size="2147483647" type="varchar" typeCode="12">
+            <parent column="id" foreignKey="Implied Constraint" implied="true" onDeleteCascade="false" schema="public" table="payment_users"/>
+         </column>
+         <primaryKey column="id" sequenceNumberInPK="1"/>
+         <index name="user_authentications_pkey" unique="true">
+            <column ascending="true" name="id"/>
+         </index>
+      </table>
+      <table name="users" remarks="" schema="public" type="TABLE">
+         <column autoUpdated="false" defaultValue="null" digits="0" id="0" name="id" nullable="false" remarks="" size="2147483647" type="uuid" typeCode="1111">
+            <child column="user_id" foreignKey="user_authentications_user_id_fkey" implied="false" onDeleteCascade="false" schema="public" table="user_authentications"/>
+         </column>
+         <column autoUpdated="false" defaultValue="now()" digits="6" id="1" name="createdAt" nullable="false" remarks="" size="29" type="timestamp" typeCode="93"/>
+         <column autoUpdated="false" defaultValue="null" digits="6" id="2" name="deletedAt" nullable="true" remarks="" size="29" type="timestamp" typeCode="93"/>
+         <primaryKey column="id" sequenceNumberInPK="1"/>
+         <index name="users_pkey" unique="true">
+            <column ascending="true" name="id"/>
+         </index>
+      </table>
+   </tables>
+   <routines>
+      <routine dataAccess="MODIFIES" deterministic="false" name="uuid_generate_v1()" returnType="uuid" securityType="INVOKER" type="FUNCTION">
+         <comment/>
+         <definition language="c"><![CDATA[uuid_generate_v1]]></definition>
+         <parameters>
+            <parameter mode="IN"/>
+         </parameters>
+      </routine>
+      <routine dataAccess="MODIFIES" deterministic="false" name="uuid_generate_v1mc()" returnType="uuid" securityType="INVOKER" type="FUNCTION">
+         <comment/>
+         <definition language="c"><![CDATA[uuid_generate_v1mc]]></definition>
+         <parameters>
+            <parameter mode="IN"/>
+         </parameters>
+      </routine>
+      <routine dataAccess="MODIFIES" deterministic="true" name="uuid_generate_v3(namespace uuid, name text)" returnType="uuid" securityType="INVOKER" type="FUNCTION">
+         <comment/>
+         <definition language="c"><![CDATA[uuid_generate_v3]]></definition>
+         <parameters>
+            <parameter mode="IN" name="namespace" type="uuid"/>
+            <parameter mode="IN" name="name" type="text"/>
+         </parameters>
+      </routine>
+      <routine dataAccess="MODIFIES" deterministic="false" name="uuid_generate_v4()" returnType="uuid" securityType="INVOKER" type="FUNCTION">
+         <comment/>
+         <definition language="c"><![CDATA[uuid_generate_v4]]></definition>
+         <parameters>
+            <parameter mode="IN"/>
+         </parameters>
+      </routine>
+      <routine dataAccess="MODIFIES" deterministic="true" name="uuid_generate_v5(namespace uuid, name text)" returnType="uuid" securityType="INVOKER" type="FUNCTION">
+         <comment/>
+         <definition language="c"><![CDATA[uuid_generate_v5]]></definition>
+         <parameters>
+            <parameter mode="IN" name="namespace" type="uuid"/>
+            <parameter mode="IN" name="name" type="text"/>
+         </parameters>
+      </routine>
+      <routine dataAccess="MODIFIES" deterministic="true" name="uuid_nil()" returnType="uuid" securityType="INVOKER" type="FUNCTION">
+         <comment/>
+         <definition language="c"><![CDATA[uuid_nil]]></definition>
+         <parameters>
+            <parameter mode="IN"/>
+         </parameters>
+      </routine>
+      <routine dataAccess="MODIFIES" deterministic="true" name="uuid_ns_dns()" returnType="uuid" securityType="INVOKER" type="FUNCTION">
+         <comment/>
+         <definition language="c"><![CDATA[uuid_ns_dns]]></definition>
+         <parameters>
+            <parameter mode="IN"/>
+         </parameters>
+      </routine>
+      <routine dataAccess="MODIFIES" deterministic="true" name="uuid_ns_oid()" returnType="uuid" securityType="INVOKER" type="FUNCTION">
+         <comment/>
+         <definition language="c"><![CDATA[uuid_ns_oid]]></definition>
+         <parameters>
+            <parameter mode="IN"/>
+         </parameters>
+      </routine>
+      <routine dataAccess="MODIFIES" deterministic="true" name="uuid_ns_url()" returnType="uuid" securityType="INVOKER" type="FUNCTION">
+         <comment/>
+         <definition language="c"><![CDATA[uuid_ns_url]]></definition>
+         <parameters>
+            <parameter mode="IN"/>
+         </parameters>
+      </routine>
+      <routine dataAccess="MODIFIES" deterministic="true" name="uuid_ns_x500()" returnType="uuid" securityType="INVOKER" type="FUNCTION">
+         <comment/>
+         <definition language="c"><![CDATA[uuid_ns_x500]]></definition>
+         <parameters>
+            <parameter mode="IN"/>
+         </parameters>
+      </routine>
+   </routines>
+</database>

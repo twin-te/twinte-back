@@ -1,0 +1,13 @@
+output = "./db/models"
+pkgname = "dbmodel"
+no-tests = true
+wipe = true
+
+[psql]
+dbname = "twinte_db"
+host = "db"
+port = 5432
+user = "postgres"
+pass = "password"
+sslmode = "disable"
+blacklist = ["schema_migrations"]
