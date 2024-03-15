@@ -14,7 +14,11 @@ import (
 
 func (g *impl) ListPaymentHistories(ctx context.Context, paymentUserID *idtype.PaymentUserID) ([]*donationdomain.PaymentHistory, error) {
 	var startingAfter *string
-	customer := lo.Ternary(paymentUserID == nil, nil, stripe.String(paymentUserID.String()))
+
+	var customer *string
+	if paymentUserID != nil {
+		customer = stripe.String(paymentUserID.String())
+	}
 
 	paymentIntents := make([]*stripe.PaymentIntent, 0)
 
@@ -26,7 +30,7 @@ func (g *impl) ListPaymentHistories(ctx context.Context, paymentUserID *idtype.P
 				StartingAfter: startingAfter,
 			},
 			Customer: customer,
-			Expand:   stripe.StringSlice([]string{"invoice"}),
+			Expand:   stripe.StringSlice([]string{"data.invoice"}),
 		})
 
 		if err := iter.Err(); err != nil {

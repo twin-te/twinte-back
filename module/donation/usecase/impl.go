@@ -34,6 +34,7 @@ func New(a authmodule.AccessController, f donationport.Factory, g donationport.G
 
 	go func() {
 		for {
+			log.Println("update contributors cache")
 			if err := uc.updateContributorsCache(context.Background()); err != nil {
 				log.Printf("failed to update contributors cache, %v", err)
 			}
@@ -43,6 +44,7 @@ func New(a authmodule.AccessController, f donationport.Factory, g donationport.G
 
 	go func() {
 		for {
+			log.Println("update total amount cache")
 			if err := uc.updateTotalAmountCache(context.Background()); err != nil {
 				log.Printf("failed to update total amount cache, %v", err)
 			}
