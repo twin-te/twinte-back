@@ -30,6 +30,7 @@ type UseCase interface {
 	SearchCourses(ctx context.Context, in SearchCoursesIn) ([]*timetabledomain.Course, error)
 
 	// CreateRegisteredCoursesByCodes creates new registered courses by the given year and codes.
+	// And it returns the registered courses, each of which has the course association loaded if it has the based course.
 	//
 	// [Authentication] required
 	//
@@ -39,21 +40,25 @@ type UseCase interface {
 	CreateRegisteredCoursesByCodes(ctx context.Context, year shareddomain.AcademicYear, codes []timetabledomain.Code) ([]*timetabledomain.RegisteredCourse, error)
 
 	// CreateRegisteredCourseManually creates a new registered course mannually.
+	// And it returns the registered course, which has the course association loaded if it has the based course.
 	//
 	// [Authentication] required
 	CreateRegisteredCourseManually(ctx context.Context, in CreateRegisteredCourseManuallyIn) (*timetabledomain.RegisteredCourse, error)
 
 	// GetRegisteredCourseByID returns the registered course specified by the given id.
+	// And it returns the registered course, which has the course association loaded if it has the based course.
 	//
 	// [Authentication] required
 	GetRegisteredCourseByID(ctx context.Context, id idtype.RegisteredCourseID) (*timetabledomain.RegisteredCourse, error)
 
 	// GetRegisteredCourses returns the registered courses.
+	// And it returns the registered courses, each of which has the course association loaded if it has the based course.
 	//
 	// [Authentication] required
 	GetRegisteredCourses(ctx context.Context, year *shareddomain.AcademicYear) ([]*timetabledomain.RegisteredCourse, error)
 
 	// UpdateRegisteredCourse updates registered course specified by the given id.
+	// And it returns the registered course, which has the course association loaded if it has the based course.
 	//
 	// [Authentication] required
 	//

@@ -2,7 +2,6 @@ package restv3
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/labstack/echo/v4"
 	"github.com/samber/lo"
@@ -14,7 +13,7 @@ import (
 	timetabledomain "github.com/twin-te/twinte-back/module/timetable/domain"
 )
 
-func toApiRegisteredCourse(registeredCourse *timetabledomain.RegisteredCourse, idToCourse map[idtype.CourseID]*timetabledomain.Course) (ret openapi.RegisteredCourse, err error) {
+func toApiRegisteredCourse(registeredCourse *timetabledomain.RegisteredCourse) (ret openapi.RegisteredCourse, err error) {
 	ret = openapi.RegisteredCourse{
 		Absence:    int(registeredCourse.Absence),
 		Attendance: int(registeredCourse.Attendance),
@@ -31,8 +30,8 @@ func toApiRegisteredCourse(registeredCourse *timetabledomain.RegisteredCourse, i
 		Year:   registeredCourse.Year.Int(),
 	}
 
-	if registeredCourse.CourseID != nil {
-		course, err := toApiCourse(idToCourse[*registeredCourse.CourseID])
+	if registeredCourse.HasBasedCourse() {
+		course, err := toApiCourse(registeredCourse.CourseAssociation.MustGet())
 		if err != nil {
 			return openapi.RegisteredCourse{}, err
 		}
@@ -80,7 +79,7 @@ func (h *impl) GetRegisteredCourses(ctx context.Context, request openapi.GetRegi
 		return
 	}
 
-	apiRegisteredCourses, err := h.getApiRegisteredCourses(ctx, registeredCourses)
+	apiRegisteredCourses, err := base.MapWithErr(registeredCourses, toApiRegisteredCourse)
 	if err != nil {
 		return
 	}
@@ -106,7 +105,7 @@ func (h *impl) postRegisteredCourses0(ctx context.Context, reqBody openapi.PostR
 		return
 	}
 
-	apiRegisteredCourses, err := h.getApiRegisteredCourses(ctx, registeredCourses)
+	apiRegisteredCourses, err := base.MapWithErr(registeredCourses, toApiRegisteredCourse)
 	if err != nil {
 		return
 	}
@@ -142,7 +141,7 @@ func (h *impl) postRegisteredCourses1(ctx context.Context, reqBody openapi.PostR
 		registeredCourses = append(registeredCourses, rcs...)
 	}
 
-	return h.getApiRegisteredCourses(ctx, registeredCourses)
+	return base.MapWithErr(registeredCourses, toApiRegisteredCourse)
 }
 
 func (h *impl) postRegisteredCourses2(ctx context.Context, reqBody openapi.PostRegisteredCoursesJSONBody2) (apiRegisteredCourse openapi.RegisteredCourse, err error) {
@@ -180,7 +179,7 @@ func (h *impl) postRegisteredCourses2(ctx context.Context, reqBody openapi.PostR
 		return
 	}
 
-	apiRegisteredCourses, err := h.getApiRegisteredCourses(ctx, []*timetabledomain.RegisteredCourse{registeredCourse})
+	apiRegisteredCourses, err := base.MapWithErr([]*timetabledomain.RegisteredCourse{registeredCourse}, toApiRegisteredCourse)
 	if err != nil {
 		return
 	}
@@ -249,7 +248,7 @@ func (h *impl) GetRegisteredCoursesId(ctx context.Context, request openapi.GetRe
 		return
 	}
 
-	apiRegisteredCourses, err := h.getApiRegisteredCourses(ctx, []*timetabledomain.RegisteredCourse{registeredCourse})
+	apiRegisteredCourses, err := base.MapWithErr([]*timetabledomain.RegisteredCourse{registeredCourse}, toApiRegisteredCourse)
 	if err != nil {
 		return
 	}
@@ -330,7 +329,7 @@ func (h *impl) PutRegisteredCoursesId(ctx context.Context, request openapi.PutRe
 		return
 	}
 
-	apiRegisteredCourses, err := h.getApiRegisteredCourses(ctx, []*timetabledomain.RegisteredCourse{registeredCourse})
+	apiRegisteredCourses, err := base.MapWithErr([]*timetabledomain.RegisteredCourse{registeredCourse}, toApiRegisteredCourse)
 	if err != nil {
 		return
 	}
@@ -338,27 +337,4 @@ func (h *impl) PutRegisteredCoursesId(ctx context.Context, request openapi.PutRe
 	res = openapi.PutRegisteredCoursesId200JSONResponse(apiRegisteredCourses[0])
 
 	return
-}
-
-func (h *impl) getApiRegisteredCourses(ctx context.Context, registeredCourses []*timetabledomain.RegisteredCourse) ([]openapi.RegisteredCourse, error) {
-	courseIDs := make([]idtype.CourseID, 0, len(registeredCourses))
-	for _, registeredCourse := range registeredCourses {
-		if registeredCourse.CourseID != nil {
-			courseIDs = append(courseIDs, *registeredCourse.CourseID)
-		}
-	}
-
-	courses, err := h.timetableUseCase.GetCoursesByIDs(ctx, courseIDs)
-	if err != nil {
-		return nil, err
-	}
-	if len(courseIDs) != len(courses) {
-		return nil, fmt.Errorf("not found courses in getApiRegisteredCourses %+v", courseIDs)
-	}
-
-	idToCourse := lo.SliceToMap(courses, func(course *timetabledomain.Course) (idtype.CourseID, *timetabledomain.Course) {
-		return course.ID, course
-	})
-
-	return base.MapWithArgAndErr(registeredCourses, idToCourse, toApiRegisteredCourse)
 }

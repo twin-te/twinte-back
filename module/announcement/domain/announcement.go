@@ -28,7 +28,7 @@ func ParseAnnouncementTag(s string) (AnnouncementTag, error) {
 	if ok {
 		return ret, nil
 	}
-	return AnnouncementTag(0), fmt.Errorf("failed to parse AnnouncementTag %#v", s)
+	return 0, fmt.Errorf("failed to parse AnnouncementTag %#v", s)
 }
 
 var (

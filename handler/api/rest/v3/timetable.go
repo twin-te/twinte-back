@@ -16,7 +16,7 @@ import (
 func (h *impl) GetTimetableDate(ctx context.Context, request openapi.GetTimetableDateRequestObject) (res openapi.GetTimetableDateResponseObject, err error) {
 	date := civil.DateOf(request.Date.Time)
 
-	year, err := shareddomain.NewAcademicYear(date.Year, date.Month)
+	year, err := shareddomain.NewAcademicYearFromDate(date)
 	if err != nil {
 		return
 	}
@@ -54,7 +54,7 @@ func (h *impl) GetTimetableDate(ctx context.Context, request openapi.GetTimetabl
 		return
 	}
 
-	apiRegisteredCourses, err := h.getApiRegisteredCourses(ctx, registeredCourses)
+	apiRegisteredCourses, err := base.MapWithErr(registeredCourses, toApiRegisteredCourse)
 	if err != nil {
 		return
 	}

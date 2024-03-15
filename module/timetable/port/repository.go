@@ -29,6 +29,8 @@ type Repository interface {
 	UpdateRegisteredCourse(ctx context.Context, registeredCourse *timetabledomain.RegisteredCourse) error
 	DeleteRegisteredCourses(ctx context.Context, conds DeleteRegisteredCoursesConds) (rowsAffected int, err error)
 
+	LoadCourseToRegisteredCourse(ctx context.Context, registeredCourses []*timetabledomain.RegisteredCourse, lock sharedport.Lock) error
+
 	// Tag
 
 	FindTag(ctx context.Context, conds FindTagConds, lock sharedport.Lock) (*timetabledomain.Tag, error)

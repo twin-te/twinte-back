@@ -17,9 +17,28 @@ var (
 
 // RegisteredCourse is identified by one of the following fields.
 //   - ID
-//   - UserID and CourseID ( if CourseID is not nil )
+//   - UserID and CourseID ( if it has based course )
 //
-// If CourseID is nil, Name, Instructors, Credit, Methods, Schedules are required.
+// There are two types of RegisteredCourse.
+//   - RegisteredCourse created manually
+//   - RegisteredCourse that has the based course
+//
+// If RegisteredCourse has the based course, the following fields are always present.
+//   - CourseID
+//
+// And the following fields are present only if overwritten.
+//   - Name
+//   - Instructors
+//   - Credit
+//   - Methods
+//   - Schedules
+//
+// If RegisteredCourse is created manually, the following fields are always present.
+//   - Name
+//   - Instructors
+//   - Credit
+//   - Methods
+//   - Schedules
 type RegisteredCourse struct {
 	ID          idtype.RegisteredCourseID
 	UserID      idtype.UserID
@@ -37,6 +56,47 @@ type RegisteredCourse struct {
 	TagIDs      []idtype.TagID
 
 	EntityBeforeUpdated *RegisteredCourse
+
+	CourseAssociation shareddomain.Association[*Course]
+}
+
+func (rc *RegisteredCourse) HasBasedCourse() bool {
+	return rc.CourseID != nil
+}
+
+func (rc *RegisteredCourse) GetName() shareddomain.RequiredString {
+	if rc.HasBasedCourse() {
+		return lo.FromPtrOr(rc.Name, rc.CourseAssociation.MustGet().Name)
+	}
+	return *rc.Name
+}
+
+func (rc *RegisteredCourse) GetInstructors() string {
+	if rc.HasBasedCourse() {
+		return lo.FromPtrOr(rc.Instructors, rc.CourseAssociation.MustGet().Instructors)
+	}
+	return *rc.Instructors
+}
+
+func (rc *RegisteredCourse) GetCredit() Credit {
+	if rc.HasBasedCourse() {
+		return lo.FromPtrOr(rc.Credit, rc.CourseAssociation.MustGet().Credit)
+	}
+	return *rc.Credit
+}
+
+func (rc *RegisteredCourse) GetMethods() []CourseMethod {
+	if rc.HasBasedCourse() {
+		return lo.FromPtrOr(rc.Methods, rc.CourseAssociation.MustGet().Methods)
+	}
+	return *rc.Methods
+}
+
+func (rc *RegisteredCourse) GetSchedules() []Schedule {
+	if rc.HasBasedCourse() {
+		return lo.FromPtrOr(rc.Schedules, rc.CourseAssociation.MustGet().Schedules)
+	}
+	return *rc.Schedules
 }
 
 func (rc *RegisteredCourse) Clone() *RegisteredCourse {
@@ -88,25 +148,60 @@ type RegisteredCourseDataToUpdate struct {
 	TagIDs      *[]idtype.TagID
 }
 
+func (rc *RegisteredCourse) updateName(name shareddomain.RequiredString) {
+	if rc.HasBasedCourse() && rc.Name == nil && rc.CourseAssociation.MustGet().Name == name {
+		return
+	}
+	rc.Name = &name
+}
+
+func (rc *RegisteredCourse) updateInstructors(instructors string) {
+	if rc.HasBasedCourse() && rc.Instructors == nil && rc.CourseAssociation.MustGet().Instructors == instructors {
+		return
+	}
+	rc.Instructors = &instructors
+}
+
+func (rc *RegisteredCourse) updateCredit(credit Credit) {
+	if rc.HasBasedCourse() && rc.Credit == nil && rc.CourseAssociation.MustGet().Credit == credit {
+		return
+	}
+	rc.Credit = &credit
+}
+
+func (rc *RegisteredCourse) updateMethods(methods []CourseMethod) {
+	// if rc.HasBasedCourse() && rc.Methods == nil && rc.CourseAssociation.MustGet().Methods == methods {
+	// 	return
+	// }
+	rc.Methods = &methods
+}
+
+func (rc *RegisteredCourse) updateSchedules(schedules []Schedule) {
+	// if rc.HasBasedCourse() && rc.Schedules == nil && rc.CourseAssociation.MustGet().Schedules == schedules {
+	// 	return
+	// }
+	rc.Schedules = &schedules
+}
+
 func (rc *RegisteredCourse) Update(data RegisteredCourseDataToUpdate) error {
 	if data.Name != nil {
-		rc.Name = data.Name
+		rc.updateName(*data.Name)
 	}
 
 	if data.Instructors != nil {
-		rc.Instructors = data.Instructors
+		rc.updateInstructors(*data.Instructors)
 	}
 
 	if data.Credit != nil {
-		rc.Credit = data.Credit
+		rc.updateCredit(*data.Credit)
 	}
 
 	if data.Methods != nil {
-		rc.Methods = data.Methods
+		rc.updateMethods(*data.Methods)
 	}
 
 	if data.Schedules != nil {
-		rc.Schedules = data.Schedules
+		rc.updateSchedules(*data.Schedules)
 	}
 
 	if data.Memo != nil {
@@ -139,7 +234,7 @@ func ConstructRegisteredCourse(fn func(rc *RegisteredCourse) (err error)) (*Regi
 	}
 
 	if rc.CourseID == nil && (rc.Name == nil || rc.Instructors == nil || rc.Credit == nil || rc.Methods == nil || rc.Schedules == nil) {
-		return nil, fmt.Errorf("the registered course, which does not have course id, must have name, instructors, credit, methods, and schedules. %+v", rc)
+		return nil, fmt.Errorf("the registered course, which does not have the based course, must have name, instructors, credit, methods, and schedules. %+v", rc)
 	}
 
 	if rc.ID.IsZero() || rc.UserID.IsZero() || rc.Year.IsZero() {

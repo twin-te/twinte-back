@@ -166,6 +166,34 @@ func (r *impl) DeleteRegisteredCourses(ctx context.Context, conds timetableport.
 	return int(db.Delete(&model.RegisteredCourse{}).RowsAffected), db.Error
 }
 
+func (r *impl) LoadCourseToRegisteredCourse(ctx context.Context, registeredCourses []*timetabledomain.RegisteredCourse, lock sharedport.Lock) error {
+	courseIDToRegisteredCourse := make(map[idtype.CourseID]*timetabledomain.RegisteredCourse, len(registeredCourses))
+	for _, registeredCourse := range registeredCourses {
+		if registeredCourse.HasBasedCourse() && registeredCourse.CourseAssociation.IsAbsent() {
+			courseIDToRegisteredCourse[*registeredCourse.CourseID] = registeredCourse
+		}
+	}
+
+	courses, err := r.ListCourses(ctx, timetableport.ListCoursesConds{
+		IDs: lo.ToPtr(lo.Keys(courseIDToRegisteredCourse)),
+	}, lock)
+	if err != nil {
+		return err
+	}
+
+	for _, course := range courses {
+		courseIDToRegisteredCourse[course.ID].CourseAssociation.Set(course)
+	}
+
+	for courseID, registeredCourse := range courseIDToRegisteredCourse {
+		if registeredCourse.CourseAssociation.IsAbsent() {
+			return fmt.Errorf("can't load course (%s) to registered course (%s)", courseID, registeredCourse.ID)
+		}
+	}
+
+	return nil
+}
+
 func fromDBRegisteredCourse(dbRegisteredCourse *model.RegisteredCourse) (*timetabledomain.RegisteredCourse, error) {
 	return timetabledomain.ConstructRegisteredCourse(func(registeredCourse *timetabledomain.RegisteredCourse) (err error) {
 		registeredCourse.ID, err = idtype.ParseRegisteredCourseID(dbRegisteredCourse.ID)

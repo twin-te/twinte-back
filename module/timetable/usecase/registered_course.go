@@ -59,14 +59,14 @@ func (uc *impl) CreateRegisteredCoursesByCodes(ctx context.Context, year sharedd
 		return nil, apperr.New(sharederr.CodeAlreadyExists, msg)
 	}
 
-	codeToCourseMap := lo.SliceToMap(courses, func(course *timetabledomain.Course) (timetabledomain.Code, *timetabledomain.Course) {
+	codeToCourse := lo.SliceToMap(courses, func(course *timetabledomain.Course) (timetabledomain.Code, *timetabledomain.Course) {
 		return course.Code, course
 	})
 
 	registeredCourses := make([]*timetabledomain.RegisteredCourse, 0, len(codes))
 
 	for _, code := range codes {
-		course, ok := codeToCourseMap[code]
+		course, ok := codeToCourse[code]
 		if !ok {
 			return nil, apperr.New(sharederr.CodeNotFound, fmt.Sprintf("not found course with code %s", code))
 		}
@@ -115,10 +115,14 @@ func (uc impl) GetRegisteredCourseByID(ctx context.Context, id idtype.Registered
 		ID:     id,
 		UserID: &userID,
 	}, sharedport.LockNone)
-	if errors.Is(err, sharedport.ErrNotFound) {
-		return nil, apperr.New(sharederr.CodeNotFound, "")
+	if err != nil {
+		if errors.Is(err, sharedport.ErrNotFound) {
+			return nil, apperr.New(sharederr.CodeNotFound, fmt.Sprintf("not found registered course whose id is %s", registeredCourse.ID))
+		}
+		return nil, err
 	}
-	return registeredCourse, err
+
+	return registeredCourse, uc.r.LoadCourseToRegisteredCourse(ctx, []*timetabledomain.RegisteredCourse{registeredCourse}, sharedport.LockNone)
 }
 
 func (uc impl) GetRegisteredCourses(ctx context.Context, year *shareddomain.AcademicYear) ([]*timetabledomain.RegisteredCourse, error) {
@@ -127,10 +131,15 @@ func (uc impl) GetRegisteredCourses(ctx context.Context, year *shareddomain.Acad
 		return nil, err
 	}
 
-	return uc.r.ListRegisteredCourses(ctx, timetableport.ListRegisteredCoursesConds{
+	registeredCourses, err := uc.r.ListRegisteredCourses(ctx, timetableport.ListRegisteredCoursesConds{
 		UserID: &userID,
 		Year:   year,
 	}, sharedport.LockNone)
+	if err != nil {
+		return nil, err
+	}
+
+	return registeredCourses, uc.r.LoadCourseToRegisteredCourse(ctx, registeredCourses, sharedport.LockNone)
 }
 
 func (uc impl) UpdateRegisteredCourse(ctx context.Context, in timetablemodule.UpdateRegisteredCourseIn) (registeredCourse *timetabledomain.RegisteredCourse, err error) {
@@ -148,6 +157,10 @@ func (uc impl) UpdateRegisteredCourse(ctx context.Context, in timetablemodule.Up
 			if errors.Is(err, sharedport.ErrNotFound) {
 				return apperr.New(sharederr.CodeNotFound, fmt.Sprintf("not found registered course whose id is %s", in.ID))
 			}
+			return err
+		}
+
+		if err := uc.r.LoadCourseToRegisteredCourse(ctx, []*timetabledomain.RegisteredCourse{registeredCourse}, sharedport.LockNone); err != nil {
 			return err
 		}
 
