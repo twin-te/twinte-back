@@ -16,7 +16,7 @@ import (
 
 func (r *impl) FindPaymentUser(ctx context.Context, conds donationport.FindPaymentUserConds, lock sharedport.Lock) (*donationdomain.PaymentUser, error) {
 	db := r.db.WithContext(ctx).
-		Where("user_id = ?", conds.UserID.String())
+		Where("twinte_user_id = ?", conds.UserID.String())
 
 	if lock != sharedport.LockNone {
 		db = db.Clauses(clause.Locking{
@@ -37,7 +37,7 @@ func (r *impl) ListPaymentUsers(ctx context.Context, conds donationport.ListPaym
 	db := r.db.WithContext(ctx)
 
 	if conds.RequireDisplayName {
-		db.Where("display_name IS NOT NULL")
+		db = db.Where("display_name IS NOT NULL")
 	}
 
 	if lock != sharedport.LockNone {
