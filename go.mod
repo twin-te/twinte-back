@@ -11,6 +11,7 @@ require (
 	github.com/oapi-codegen/runtime v1.1.1
 	github.com/rs/cors v1.10.1
 	github.com/samber/lo v1.39.0
+	github.com/samber/mo v1.11.0
 	github.com/spf13/cobra v1.8.0
 	github.com/stretchr/testify v1.8.4
 	github.com/stripe/stripe-go/v76 v76.18.0

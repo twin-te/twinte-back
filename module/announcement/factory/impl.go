@@ -19,7 +19,7 @@ func (f *impl) NewAlreadyRead(userID idtype.UserID, announcementID idtype.Announ
 		ar.ID = idtype.NewAlreadyReadID()
 		ar.UserID = userID
 		ar.AnnouncementID = announcementID
-		ar.ReadAt = time.Now()
+		ar.ReadAt = f.nowFunc()
 		return nil
 	})
 }

@@ -10,7 +10,6 @@ import (
 	"github.com/twin-te/twinte-back/apperr"
 	authmodule "github.com/twin-te/twinte-back/module/auth"
 	"github.com/twin-te/twinte-back/module/shared/domain/idtype"
-	sharederr "github.com/twin-te/twinte-back/module/shared/err"
 )
 
 func getSessionIDFromHeader(header http.Header) (id idtype.SessionID, ok bool) {
@@ -51,17 +50,8 @@ func NewErrorInterceptor() connect.UnaryInterceptorFunc {
 		) (connect.AnyResponse, error) {
 			res, err := next(ctx, req)
 			if aerr, ok := apperr.As(err); ok {
-				switch aerr.Code {
-				case sharederr.CodeAlreadyExists:
-					err = connect.NewError(connect.CodeAlreadyExists, err)
-				case sharederr.CodeInvalidArgument:
-					err = connect.NewError(connect.CodeInvalidArgument, err)
-				case sharederr.CodeNotFound:
-					err = connect.NewError(connect.CodeNotFound, err)
-				case sharederr.CodeUnauthorized:
-					err = connect.NewError(connect.CodePermissionDenied, err)
-				case sharederr.CodeUnauthenticated:
-					err = connect.NewError(connect.CodeUnauthenticated, err)
+				if connectErrorCode, ok := AppErrorCodeToConnectErrorCode[aerr.Code]; ok {
+					err = connect.NewError(connectErrorCode, err)
 				}
 			}
 			return res, err

@@ -9,9 +9,9 @@ import (
 	"github.com/samber/lo"
 	"github.com/twin-te/twinte-back/apperr"
 	announcementdomain "github.com/twin-te/twinte-back/module/announcement/domain"
+	announcementerr "github.com/twin-te/twinte-back/module/announcement/err"
 	announcementport "github.com/twin-te/twinte-back/module/announcement/port"
 	"github.com/twin-te/twinte-back/module/shared/domain/idtype"
-	sharederr "github.com/twin-te/twinte-back/module/shared/err"
 	sharedport "github.com/twin-te/twinte-back/module/shared/port"
 )
 
@@ -32,7 +32,7 @@ func (uc *impl) GetReadFlags(ctx context.Context, ids []idtype.AnnouncementID) (
 		if !lo.ContainsBy(announcements, func(announcement *announcementdomain.Announcement) bool {
 			return id == announcement.ID
 		}) {
-			return nil, apperr.New(sharederr.CodeNotFound, fmt.Sprintf("not found announcement whose id is %s", id))
+			return nil, apperr.New(announcementerr.CodeAnnouncementNotFound, fmt.Sprintf("not found announcement whose id is %s", id))
 		}
 	}
 
@@ -66,7 +66,7 @@ func (uc *impl) UpdateReadFlag(ctx context.Context, id idtype.AnnouncementID, re
 	}, sharedport.LockNone)
 	if err != nil {
 		if errors.Is(err, sharedport.ErrNotFound) {
-			return apperr.New(sharederr.CodeNotFound, fmt.Sprintf("not found announcement whose id is %s", id))
+			return apperr.New(announcementerr.CodeAnnouncementNotFound, fmt.Sprintf("not found announcement whose id is %s", id))
 		}
 		return err
 	}

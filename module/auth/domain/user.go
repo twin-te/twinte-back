@@ -10,7 +10,6 @@ import (
 	"github.com/twin-te/twinte-back/base"
 	autherr "github.com/twin-te/twinte-back/module/auth/err"
 	"github.com/twin-te/twinte-back/module/shared/domain/idtype"
-	sharederr "github.com/twin-te/twinte-back/module/shared/err"
 )
 
 // User is identified by one of the following fields.
@@ -37,12 +36,12 @@ func (u *User) BeforeUpdateHook() {
 // AddAuthentication adds the given authentication.
 //
 // [Error Code]
-//   - auth.MultipleAuthenticationOfSameProvider
+//   - auth.UserHasAtMostOneAuthenticationFromSameProvider
 func (u *User) AddAuthentication(newAuthentication UserAuthentication) error {
 	for _, authentication := range u.Authentications {
 		if newAuthentication.Provider == authentication.Provider {
 			return apperr.New(
-				autherr.CodeMultipleAuthenticationOfSameProvider,
+				autherr.CodeUserHasAtMostOneAuthenticationFromSameProvider,
 				fmt.Sprintf("the authentication whose provider is %d is already registered", newAuthentication.Provider),
 			)
 		}
@@ -54,7 +53,7 @@ func (u *User) AddAuthentication(newAuthentication UserAuthentication) error {
 // DeleteAuthentication deletes the authentication specified by the given provider.
 //
 // [Error Code]
-//   - shared.NotFound
+//   - auth.UserAuthenticationNotAssociated
 //   - auth.UserHasAtLeastOneAuthentication
 func (u *User) DeleteAuthentication(provider Provider) error {
 	if len(u.Authentications) == 1 {
@@ -69,8 +68,8 @@ func (u *User) DeleteAuthentication(provider Provider) error {
 	}
 
 	return apperr.New(
-		sharederr.CodeNotFound,
-		fmt.Sprintf("the authentication whose provider is %s is not found", provider),
+		autherr.CodeUserAuthenticationNotAssociated,
+		fmt.Sprintf("the authentication whose provider is %s is not associated", provider),
 	)
 }
 

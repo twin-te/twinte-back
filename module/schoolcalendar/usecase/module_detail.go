@@ -7,9 +7,9 @@ import (
 	"cloud.google.com/go/civil"
 	"github.com/twin-te/twinte-back/apperr"
 	schoolcalendardomain "github.com/twin-te/twinte-back/module/schoolcalendar/domain"
+	schoolcalendarerr "github.com/twin-te/twinte-back/module/schoolcalendar/err"
 	schoolcalendarport "github.com/twin-te/twinte-back/module/schoolcalendar/port"
 	shareddomain "github.com/twin-te/twinte-back/module/shared/domain"
-	sharederr "github.com/twin-te/twinte-back/module/shared/err"
 	sharedport "github.com/twin-te/twinte-back/module/shared/port"
 )
 
@@ -29,7 +29,7 @@ func (uc *impl) GetModuleByDate(ctx context.Context, date civil.Date) (schoolcal
 	}
 
 	if len(moduleDetails) == 0 {
-		return 0, apperr.New(sharederr.CodeNotFound, fmt.Sprintf("not found module corresponding to the date %s", date))
+		return 0, apperr.New(schoolcalendarerr.CodeModuleNotFound, fmt.Sprintf("not found module corresponding to the date %s", date))
 	}
 
 	return moduleDetails[0].Module, nil

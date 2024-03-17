@@ -9,7 +9,10 @@ import (
 
 // UseCase represents application specific business rules.
 //
-// The error codes for authentication and authorization failures are not stated explicitly.
+// The following error codes are not stated explicitly in the each method, but may be returned.
+//   - shared.InvalidArgument
+//   - shared.Unauthenticated
+//   - shared.Unauthorized
 type UseCase interface {
 	// GetAnnouncements returns all published announcements.
 	//
@@ -21,7 +24,7 @@ type UseCase interface {
 	// [Authentication] required
 	//
 	// [Error Code]
-	//   - shared.NotFound ( if any of the announcements specified by the given ids is not found )
+	//   - announcement.AnnouncementNotFound
 	GetReadFlags(ctx context.Context, ids []idtype.AnnouncementID) (map[idtype.AnnouncementID]bool, error)
 
 	// UpdateReadFlag updates the read flag of the announcement specified by the given id.
@@ -29,6 +32,6 @@ type UseCase interface {
 	// [Authentication] required
 	//
 	// [Error Code]
-	//   - shared.NotFound
+	//   - announcement.AnnouncementNotFound
 	UpdateReadFlag(ctx context.Context, id idtype.AnnouncementID, readFlag bool) error
 }

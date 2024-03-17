@@ -3,43 +3,14 @@ package schoolcalendardomain
 import (
 	"errors"
 	"fmt"
+	"time"
 
 	"cloud.google.com/go/civil"
 	"github.com/samber/lo"
 	"github.com/twin-te/twinte-back/base"
+	shareddomain "github.com/twin-te/twinte-back/module/shared/domain"
 	"github.com/twin-te/twinte-back/module/shared/domain/idtype"
 )
-
-//go:generate go run golang.org/x/tools/cmd/stringer -type=Weekday -trimprefix=Weekday -output=weekday_string.gen.go
-type Weekday int
-
-const (
-	WeekdaySunday Weekday = iota + 1
-	WeekdayMonday
-	WeekdayTuesday
-	WeekdayWednesday
-	WeekdayThursday
-	WeekdayFriday
-	WeekdaySaturday
-)
-
-var AllWeekdays = []Weekday{
-	WeekdaySunday,
-	WeekdayMonday,
-	WeekdayTuesday,
-	WeekdayWednesday,
-	WeekdayThursday,
-	WeekdayFriday,
-	WeekdaySaturday,
-}
-
-func ParseWeekday(s string) (Weekday, error) {
-	ret, ok := base.FindByString(AllWeekdays, s)
-	if ok {
-		return ret, nil
-	}
-	return 0, fmt.Errorf("failed to parse Weekday %#v", s)
-}
 
 //go:generate go run golang.org/x/tools/cmd/stringer -type=EventType -trimprefix=EventType -output=event_type_string.gen.go
 type EventType int
@@ -83,9 +54,41 @@ type Event struct {
 	Description string
 
 	// It is not nil, only if Type is EventTypeSubstituteDay.
-	ChangeTo *Weekday
+	ChangeTo *time.Weekday
 
 	EntityBeforeUpdated *Event
+}
+
+func (e *Event) IsSpringAExam() bool {
+	return e.Description == "春A 期末試験"
+}
+
+func (e *Event) IsSpringABExam() bool {
+	return e.Description == "春AB 期末試験"
+}
+
+func (e *Event) IsSpringABCExam() bool {
+	return e.Description == "春ABC 期末試験"
+}
+
+func (e *Event) IsSpringCExam() bool {
+	return e.Description == "春C 期末試験"
+}
+
+func (e *Event) IsFallAExam() bool {
+	return e.Description == "秋A 期末試験"
+}
+
+func (e *Event) IsFallABExam() bool {
+	return e.Description == "秋AB 期末試験"
+}
+
+func (e *Event) IsFallABCExam() bool {
+	return e.Description == "秋ABC 期末試験"
+}
+
+func (e *Event) IsFallCExam() bool {
+	return e.Description == "秋C 期末試験"
 }
 
 func (e *Event) Clone() *Event {
@@ -132,12 +135,14 @@ func ParseEvent(id int, eventType string, date string, description string, chang
 			return
 		}
 
+		e.Description = description
+
 		if e.Type.IsSubstituteDay() {
 			if changeTo == nil {
 				return errors.New("field 'ChangeTo' must not be nil for substitute event")
 			}
 
-			e.ChangeTo, err = base.ToPtrWithErr(ParseWeekday(*changeTo))
+			e.ChangeTo, err = base.ToPtrWithErr(shareddomain.ParseWeekday(*changeTo))
 			if err != nil {
 				return
 			}

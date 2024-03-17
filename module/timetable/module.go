@@ -10,16 +10,19 @@ import (
 
 // UseCase represents application specific business rules.
 //
-// The error codes for authentication and authorization failures are not stated explicitly.
+// The following error codes are not stated explicitly in the each method, but may be returned.
+//   - shared.InvalidArgument
+//   - shared.Unauthenticated
+//   - shared.Unauthorized
 type UseCase interface {
 	// GetCoursesByIDs returns the courses specified by the given ids.
-	// If any of the target courses is not found, no error occurs.
+	// If any of the target courses is not found, no error will not be returned.
 	//
 	// [Authentication] not required
 	GetCoursesByIDs(ctx context.Context, ids []idtype.CourseID) ([]*timetabledomain.Course, error)
 
 	// GetCoursesByCodes returns the courses specified by the given year and codes.
-	// If any of the target courses is not found, no error occurs.
+	// If any of the target courses is not found, no error will not be returned.
 	//
 	// [Authentication] not required
 	GetCoursesByCodes(ctx context.Context, year shareddomain.AcademicYear, codes []timetabledomain.Code) ([]*timetabledomain.Course, error)
@@ -35,8 +38,8 @@ type UseCase interface {
 	// [Authentication] required
 	//
 	// [Error Code]
-	//   - shared.AlreadyExists
-	//   - shared.NotFound
+	//   - timetable.CourseNotFound
+	//   - timetable.RegisteredCourseAlreadyExists
 	CreateRegisteredCoursesByCodes(ctx context.Context, year shareddomain.AcademicYear, codes []timetabledomain.Code) ([]*timetabledomain.RegisteredCourse, error)
 
 	// CreateRegisteredCourseManually creates a new registered course mannually.
@@ -46,13 +49,16 @@ type UseCase interface {
 	CreateRegisteredCourseManually(ctx context.Context, in CreateRegisteredCourseManuallyIn) (*timetabledomain.RegisteredCourse, error)
 
 	// GetRegisteredCourseByID returns the registered course specified by the given id.
-	// And it returns the registered course, which has the course association loaded if it has the based course.
+	// The returned registered course has the course association loaded if it has the based course.
 	//
 	// [Authentication] required
+	//
+	// [Error Code]
+	//   - timetable.RegisteredCourseNotFound
 	GetRegisteredCourseByID(ctx context.Context, id idtype.RegisteredCourseID) (*timetabledomain.RegisteredCourse, error)
 
 	// GetRegisteredCourses returns the registered courses.
-	// And it returns the registered courses, each of which has the course association loaded if it has the based course.
+	// Each of the returned registered courses has the course association loaded if it has the based course.
 	//
 	// [Authentication] required
 	GetRegisteredCourses(ctx context.Context, year *shareddomain.AcademicYear) ([]*timetabledomain.RegisteredCourse, error)
@@ -63,8 +69,7 @@ type UseCase interface {
 	// [Authentication] required
 	//
 	// [Error Code]
-	//   - shared.NotFound
-	//   - shared.InvalidArgument ( if the user does not have tags specified by the given TagIDs )
+	//   - timetable.RegisteredCourseNotFound
 	UpdateRegisteredCourse(ctx context.Context, in UpdateRegisteredCourseIn) (*timetabledomain.RegisteredCourse, error)
 
 	// DeleteRegisteredCourse deletes registered course specified by the given id.
@@ -72,7 +77,7 @@ type UseCase interface {
 	// [Authentication] required
 	//
 	// [Error Code]
-	//   - shared.NotFound
+	//   - timetable.RegisteredCourseNotFound
 	DeleteRegisteredCourse(ctx context.Context, id idtype.RegisteredCourseID) error
 
 	// CreateTag creates a new tag.
@@ -90,7 +95,7 @@ type UseCase interface {
 	// [Authentication] required
 	//
 	// [Error Code]
-	//   - shared.NotFound
+	//   - timetable.TagNotFound
 	UpdateTag(ctx context.Context, in UpdateTagIn) (*timetabledomain.Tag, error)
 
 	// DeleteTag deletes the tag specified by the given id.
@@ -98,16 +103,13 @@ type UseCase interface {
 	// [Authentication] required
 	//
 	// [Error Code]
-	//   - shared.NotFound
+	//   - timetable.TagNotFound
 	DeleteTag(ctx context.Context, id idtype.TagID) error
 
 	// RearrangeTags rearranges the tags.
-	// Please specify all tags associated with the user.
+	// Please specify all tag ids associated with the user.
 	//
 	// [Authentication] required
-	//
-	// [Error Code]
-	//   - shared.InvalidArgument
 	RearrangeTags(ctx context.Context, tagIDs []idtype.TagID) error
 
 	// UpdateCoursesBasedOnKDB retrieves data about courses from kdb and updates courses.
@@ -116,9 +118,6 @@ type UseCase interface {
 	//
 	// [Permission]
 	//   - PermissionExecuteBatchJob
-	//
-	// [Error Code]
-	//   - shared.NotFound
 	UpdateCoursesBasedOnKDB(ctx context.Context, year shareddomain.AcademicYear) error
 }
 

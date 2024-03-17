@@ -10,7 +10,10 @@ import (
 
 // UseCase represents application specific business rules.
 //
-// The error codes for authentication and authorization failures are not stated explicitly.
+// The following error codes are not stated explicitly in the each method, but may be returned.
+//   - shared.InvalidArgument
+//   - shared.Unauthenticated
+//   - shared.Unauthorized
 type UseCase interface {
 	// GetEvents returns the events specified by the given year.
 	//
@@ -32,6 +35,6 @@ type UseCase interface {
 	// [Authentication] not required
 	//
 	// [Error Code]
-	//   - shared.NotFound
+	//   - schoolcalendar.ModuleNotFound
 	GetModuleByDate(ctx context.Context, date civil.Date) (schoolcalendardomain.Module, error)
 }

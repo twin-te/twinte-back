@@ -18,7 +18,10 @@ import (
 	authfactory "github.com/twin-te/twinte-back/module/auth/factory"
 	authrepository "github.com/twin-te/twinte-back/module/auth/repository"
 	authusecase "github.com/twin-te/twinte-back/module/auth/usecase"
-	donationmodule "github.com/twin-te/twinte-back/module/donation"
+	donationfactory "github.com/twin-te/twinte-back/module/donation/factory"
+	donationgateway "github.com/twin-te/twinte-back/module/donation/gateway"
+	donationrepository "github.com/twin-te/twinte-back/module/donation/repository"
+	donationusecase "github.com/twin-te/twinte-back/module/donation/usecase"
 	schoolcalendarrepository "github.com/twin-te/twinte-back/module/schoolcalendar/repository"
 	schoolcalendarusecase "github.com/twin-te/twinte-back/module/schoolcalendar/usecase"
 	timetablefactory "github.com/twin-te/twinte-back/module/timetable/factory"
@@ -57,11 +60,10 @@ var serveCmd = &cobra.Command{
 			log.Fatalln(err)
 		}
 
-		var dummyDonationUseCase donationmodule.UseCase
-		// donationFactory := donationfactory.New()
-		// donationGateway := donationgateway.New()
-		// donationRepository := donationrepository.New(db)
-		// donationUseCase := donationusecase.New(accessController, donationFactory, donationGateway, donationRepository)
+		donationFactory := donationfactory.New()
+		donationGateway := donationgateway.New()
+		donationRepository := donationrepository.New(db)
+		donationUseCase := donationusecase.New(accessController, donationFactory, donationGateway, donationRepository)
 
 		schoolcalendarRepository := schoolcalendarrepository.New()
 		schoolcalendarUseCase := schoolcalendarusecase.New(accessController, schoolcalendarRepository)
@@ -93,7 +95,7 @@ var serveCmd = &cobra.Command{
 			accessController,
 			announcementUsecase,
 			authUseCase,
-			dummyDonationUseCase,
+			donationUseCase,
 			schoolcalendarUseCase,
 			timetableUseCase,
 		)

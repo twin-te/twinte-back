@@ -1,6 +1,8 @@
 package base
 
-import "fmt"
+import (
+	"fmt"
+)
 
 func CopySlice[T any](collection []T) []T {
 	ret := make([]T, len(collection))

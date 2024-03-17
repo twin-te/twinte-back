@@ -3,11 +3,12 @@ package authusecase
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	"github.com/twin-te/twinte-back/apperr"
 	authdomain "github.com/twin-te/twinte-back/module/auth/domain"
+	autherr "github.com/twin-te/twinte-back/module/auth/err"
 	authport "github.com/twin-te/twinte-back/module/auth/port"
-	sharederr "github.com/twin-te/twinte-back/module/shared/err"
 	sharedport "github.com/twin-te/twinte-back/module/shared/port"
 )
 
@@ -40,9 +41,6 @@ func (uc *impl) GetMe(ctx context.Context) (*authdomain.User, error) {
 	if err != nil {
 		return nil, err
 	}
-	if err != nil {
-		return nil, err
-	}
 
 	return uc.r.FindUser(ctx, authport.FindUserConds{
 		ID: &userID,
@@ -63,7 +61,7 @@ func (uc *impl) AddUserAuthentication(ctx context.Context, userAuthentication au
 			if err != nil {
 				return err
 			}
-			return apperr.New(sharederr.CodeAlreadyExists, "the given user authentication already exists")
+			return apperr.New(autherr.CodeUserAuthenticationAlreadyExists, fmt.Sprintf("the given user authentication already exists, %+v", userAuthentication))
 		}
 
 		user, err := rtx.FindUser(ctx, authport.FindUserConds{

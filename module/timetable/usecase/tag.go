@@ -10,10 +10,11 @@ import (
 	"github.com/twin-te/twinte-back/base"
 	shareddomain "github.com/twin-te/twinte-back/module/shared/domain"
 	"github.com/twin-te/twinte-back/module/shared/domain/idtype"
-	sharederr "github.com/twin-te/twinte-back/module/shared/err"
+	sharedhelper "github.com/twin-te/twinte-back/module/shared/helper"
 	sharedport "github.com/twin-te/twinte-back/module/shared/port"
 	timetablemodule "github.com/twin-te/twinte-back/module/timetable"
 	timetabledomain "github.com/twin-te/twinte-back/module/timetable/domain"
+	timetableerr "github.com/twin-te/twinte-back/module/timetable/err"
 	timetableport "github.com/twin-te/twinte-back/module/timetable/port"
 )
 
@@ -58,7 +59,7 @@ func (uc impl) UpdateTag(ctx context.Context, in timetablemodule.UpdateTagIn) (t
 		}, sharedport.LockExclusive)
 		if err != nil {
 			if errors.Is(err, sharedport.ErrNotFound) {
-				return apperr.New(sharederr.CodeNotFound, fmt.Sprintf("not found tag whose id is %s", in.ID))
+				return apperr.New(timetableerr.CodeTagNotFound, fmt.Sprintf("not found tag whose id is %s", in.ID))
 			}
 			return err
 		}
@@ -86,7 +87,7 @@ func (uc impl) DeleteTag(ctx context.Context, id idtype.TagID) error {
 	}
 
 	if rowsAffected == 0 {
-		return apperr.New(sharederr.CodeNotFound, fmt.Sprintf("not found tag whose id is %s", id))
+		return apperr.New(timetableerr.CodeTagNotFound, fmt.Sprintf("not found tag whose id is %s", id))
 	}
 
 	return nil
@@ -98,9 +99,8 @@ func (uc impl) RearrangeTags(ctx context.Context, ids []idtype.TagID) error {
 		return err
 	}
 
-	duplicates := lo.FindDuplicates(ids)
-	if len(duplicates) != 0 {
-		return apperr.New(sharederr.CodeInvalidArgument, fmt.Sprintf("found duplicate ids %v", duplicates))
+	if err := sharedhelper.ValidateDuplicates(ids); err != nil {
+		return err
 	}
 
 	return uc.r.Transaction(ctx, func(rtx timetableport.Repository) error {
@@ -115,10 +115,8 @@ func (uc impl) RearrangeTags(ctx context.Context, ids []idtype.TagID) error {
 			return tag.ID
 		})
 
-		left, right := lo.Difference(savedTagIDs, ids)
-
-		if len(left) != 0 || len(right) != 0 {
-			return apperr.New(sharederr.CodeInvalidArgument, fmt.Sprintf("expect tag ids %v, but got %v", savedTagIDs, ids))
+		if err := sharedhelper.ValidateDifference(savedTagIDs, ids); err != nil {
+			return err
 		}
 
 		lo.ForEach(tags, func(tag *timetabledomain.Tag, _ int) {

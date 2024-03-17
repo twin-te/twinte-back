@@ -2,6 +2,7 @@ package timetabledomain
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/twin-te/twinte-back/base"
 	"golang.org/x/exp/constraints"
@@ -42,6 +43,27 @@ func ParseModule(s string) (Module, error) {
 
 //go:generate go run golang.org/x/tools/cmd/stringer -type=Day -trimprefix=Day -output=day_string.gen.go
 type Day int
+
+func (d Day) Weekday() time.Weekday {
+	switch d {
+	case DaySun:
+		return time.Sunday
+	case DayMon:
+		return time.Monday
+	case DayTue:
+		return time.Tuesday
+	case DayWed:
+		return time.Wednesday
+	case DayThu:
+		return time.Thursday
+	case DayFri:
+		return time.Friday
+	case DaySat:
+		return time.Saturday
+	}
+
+	panic(fmt.Errorf("day (%#v) can't convert weekday", d))
+}
 
 func (d Day) IsNormal() bool {
 	return DaySun <= d && d <= DaySat

@@ -11,9 +11,11 @@ import (
 	shareddomain "github.com/twin-te/twinte-back/module/shared/domain"
 	"github.com/twin-te/twinte-back/module/shared/domain/idtype"
 	sharederr "github.com/twin-te/twinte-back/module/shared/err"
+	sharedhelper "github.com/twin-te/twinte-back/module/shared/helper"
 	sharedport "github.com/twin-te/twinte-back/module/shared/port"
 	timetablemodule "github.com/twin-te/twinte-back/module/timetable"
 	timetabledomain "github.com/twin-te/twinte-back/module/timetable/domain"
+	timetableerr "github.com/twin-te/twinte-back/module/timetable/err"
 	timetableport "github.com/twin-te/twinte-back/module/timetable/port"
 )
 
@@ -56,7 +58,7 @@ func (uc *impl) CreateRegisteredCoursesByCodes(ctx context.Context, year sharedd
 			}
 			msg += courseIDToCode[*savedsavedTargetRegisteredCourse.CourseID].String()
 		}
-		return nil, apperr.New(sharederr.CodeAlreadyExists, msg)
+		return nil, apperr.New(timetableerr.CodeRegisteredCourseAlreadyExists, msg)
 	}
 
 	codeToCourse := lo.SliceToMap(courses, func(course *timetabledomain.Course) (timetabledomain.Code, *timetabledomain.Course) {
@@ -68,7 +70,7 @@ func (uc *impl) CreateRegisteredCoursesByCodes(ctx context.Context, year sharedd
 	for _, code := range codes {
 		course, ok := codeToCourse[code]
 		if !ok {
-			return nil, apperr.New(sharederr.CodeNotFound, fmt.Sprintf("not found course with code %s", code))
+			return nil, apperr.New(timetableerr.CodeCourseNotFound, fmt.Sprintf("not found course with code %s", code))
 		}
 		registeredCourse, err := uc.f.NewRegisteredCourseFromCourse(userID, course)
 		if err != nil {
@@ -117,7 +119,7 @@ func (uc impl) GetRegisteredCourseByID(ctx context.Context, id idtype.Registered
 	}, sharedport.LockNone)
 	if err != nil {
 		if errors.Is(err, sharedport.ErrNotFound) {
-			return nil, apperr.New(sharederr.CodeNotFound, fmt.Sprintf("not found registered course whose id is %s", registeredCourse.ID))
+			return nil, apperr.New(timetableerr.CodeRegisteredCourseNotFound, fmt.Sprintf("not found registered course whose id is %s", registeredCourse.ID))
 		}
 		return nil, err
 	}
@@ -148,6 +150,24 @@ func (uc impl) UpdateRegisteredCourse(ctx context.Context, in timetablemodule.Up
 		return nil, err
 	}
 
+	if in.Methods != nil {
+		if err := sharedhelper.ValidateDuplicates(*in.Methods); err != nil {
+			return nil, err
+		}
+	}
+
+	if in.Schedules != nil {
+		if err := sharedhelper.ValidateDuplicates(*in.Schedules); err != nil {
+			return nil, err
+		}
+	}
+
+	if in.TagIDs != nil {
+		if err := sharedhelper.ValidateDuplicates(*in.TagIDs); err != nil {
+			return nil, err
+		}
+	}
+
 	err = uc.r.Transaction(ctx, func(rtx timetableport.Repository) (err error) {
 		registeredCourse, err = rtx.FindRegisteredCourse(ctx, timetableport.FindRegisteredCourseConds{
 			ID:     in.ID,
@@ -155,7 +175,7 @@ func (uc impl) UpdateRegisteredCourse(ctx context.Context, in timetablemodule.Up
 		}, sharedport.LockExclusive)
 		if err != nil {
 			if errors.Is(err, sharedport.ErrNotFound) {
-				return apperr.New(sharederr.CodeNotFound, fmt.Sprintf("not found registered course whose id is %s", in.ID))
+				return apperr.New(timetableerr.CodeRegisteredCourseNotFound, fmt.Sprintf("not found registered course whose id is %s", in.ID))
 			}
 			return err
 		}
@@ -172,12 +192,11 @@ func (uc impl) UpdateRegisteredCourse(ctx context.Context, in timetablemodule.Up
 				return err
 			}
 
-			for _, tagID := range *in.TagIDs {
-				if !lo.ContainsBy(tags, func(tag *timetabledomain.Tag) bool {
-					return tagID == tag.ID
-				}) {
-					return apperr.New(sharederr.CodeInvalidArgument, fmt.Sprintf("the tag whose id is %s is not found", tagID))
-				}
+			savedTagIDs := base.Map(tags, func(tag *timetabledomain.Tag) idtype.TagID { return tag.ID })
+
+			notFoundTagIDs, _ := lo.Difference(*in.TagIDs, savedTagIDs)
+			if len(notFoundTagIDs) != 0 {
+				return apperr.New(sharederr.CodeInvalidArgument, fmt.Sprintf("invalid tag ids %+v", notFoundTagIDs))
 			}
 		}
 
@@ -217,7 +236,7 @@ func (uc impl) DeleteRegisteredCourse(ctx context.Context, id idtype.RegisteredC
 	}
 
 	if rowsAffected == 0 {
-		return apperr.New(sharederr.CodeNotFound, fmt.Sprintf("not found registered course whose id is %s", id))
+		return apperr.New(timetableerr.CodeRegisteredCourseNotFound, fmt.Sprintf("not found registered course whose id is %s", id))
 	}
 
 	return nil

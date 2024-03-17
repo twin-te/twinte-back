@@ -3,6 +3,8 @@ package shareddomain
 import (
 	"fmt"
 	"time"
+
+	"cloud.google.com/go/civil"
 )
 
 // AcademicYear starts in April and ends in March.
@@ -29,4 +31,8 @@ func NewAcademicYear(year int, month time.Month) (AcademicYear, error) {
 		year -= 1
 	}
 	return ParseAcademicYear(year)
+}
+
+func NewAcademicYearFromDate(date civil.Date) (AcademicYear, error) {
+	return NewAcademicYear(date.Year, date.Month)
 }
