@@ -13,21 +13,21 @@ import (
 	openapi_types "github.com/oapi-codegen/runtime/types"
 )
 
-func toApiCourseDay(day schoolcalendardomain.Weekday) (openapi.CourseDay, error) {
+func toApiCourseDay(day time.Weekday) (openapi.CourseDay, error) {
 	switch day {
-	case schoolcalendardomain.WeekdaySunday:
+	case time.Sunday:
 		return openapi.CourseDaySun, nil
-	case schoolcalendardomain.WeekdayMonday:
+	case time.Monday:
 		return openapi.CourseDayMon, nil
-	case schoolcalendardomain.WeekdayTuesday:
+	case time.Tuesday:
 		return openapi.CourseDayTue, nil
-	case schoolcalendardomain.WeekdayWednesday:
+	case time.Wednesday:
 		return openapi.CourseDayWed, nil
-	case schoolcalendardomain.WeekdayThursday:
+	case time.Thursday:
 		return openapi.CourseDayThu, nil
-	case schoolcalendardomain.WeekdayFriday:
+	case time.Friday:
 		return openapi.CourseDayFri, nil
-	case schoolcalendardomain.WeekdaySaturday:
+	case time.Saturday:
 		return openapi.CourseDaySat, nil
 	}
 	return "", fmt.Errorf("invalid %#v", day)
