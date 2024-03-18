@@ -24,16 +24,12 @@ func NewEchoErrorHandler() func(echo.HandlerFunc) echo.HandlerFunc {
 
 			if aerr, ok := apperr.As(err); ok {
 				switch aerr.Code {
-				case sharederr.CodeAlreadyExists:
-					return echo.NewHTTPError(http.StatusConflict, aerr.Message)
 				case sharederr.CodeInvalidArgument:
 					return echo.NewHTTPError(http.StatusBadRequest, aerr.Message)
 				case sharederr.CodeUnauthenticated:
 					return echo.ErrUnauthorized
 				case sharederr.CodeUnauthorized:
 					return echo.ErrForbidden
-				case sharederr.CodeNotFound:
-					return echo.NewHTTPError(http.StatusNotFound, aerr.Message)
 				}
 			}
 

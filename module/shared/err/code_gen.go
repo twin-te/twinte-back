@@ -5,9 +5,7 @@ package sharederr
 import "github.com/twin-te/twinte-back/apperr"
 
 const (
-	CodeAlreadyExists   apperr.Code = "shared.AlreadyExists"
 	CodeInvalidArgument apperr.Code = "shared.InvalidArgument"
-	CodeNotFound        apperr.Code = "shared.NotFound"
 	CodeUnauthenticated apperr.Code = "shared.Unauthenticated"
 	CodeUnauthorized    apperr.Code = "shared.Unauthorized"
 )

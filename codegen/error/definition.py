@@ -37,9 +37,7 @@ definition: dict[str, list[tuple[str, ConnectErrorCode]]] = {
         ("ModuleNotFound", NotFound),
     ],
     "shared": [
-        ("AlreadyExists", AlreadyExists),
         ("InvalidArgument", InvalidArgument),
-        ("NotFound", NotFound),
         ("Unauthenticated", Unauthenticated),
         ("Unauthorized", PermissionDenied),
     ],

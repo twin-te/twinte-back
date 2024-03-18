@@ -3,14 +3,14 @@ package restv3
 import (
 	"context"
 	"fmt"
+	"net/http"
 	"strconv"
 	"strings"
 
-	"github.com/twin-te/twinte-back/apperr"
+	"github.com/labstack/echo/v4"
 	"github.com/twin-te/twinte-back/base"
 	"github.com/twin-te/twinte-back/handler/api/rest/v3/openapi"
 	shareddomain "github.com/twin-te/twinte-back/module/shared/domain"
-	sharederr "github.com/twin-te/twinte-back/module/shared/err"
 	timetablemodule "github.com/twin-te/twinte-back/module/timetable"
 	timetabledomain "github.com/twin-te/twinte-back/module/timetable/domain"
 )
@@ -328,7 +328,7 @@ func (h *impl) GetCoursesYearCode(ctx context.Context, request openapi.GetCourse
 	}
 
 	if len(courses) == 0 {
-		return nil, apperr.New(sharederr.CodeNotFound, "")
+		return nil, echo.NewHTTPError(http.StatusNotFound, "not found course")
 	}
 
 	apiCourse, err := toApiCourse(courses[0])

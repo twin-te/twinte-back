@@ -25,9 +25,7 @@ var AppErrorCodeToConnectErrorCode = map[apperr.Code]connect.Code{
 
 	schoolcalendarerr.CodeModuleNotFound: connect.CodeNotFound,
 
-	sharederr.CodeAlreadyExists:   connect.CodeAlreadyExists,
 	sharederr.CodeInvalidArgument: connect.CodeInvalidArgument,
-	sharederr.CodeNotFound:        connect.CodeNotFound,
 	sharederr.CodeUnauthenticated: connect.CodeUnauthenticated,
 	sharederr.CodeUnauthorized:    connect.CodePermissionDenied,
 
