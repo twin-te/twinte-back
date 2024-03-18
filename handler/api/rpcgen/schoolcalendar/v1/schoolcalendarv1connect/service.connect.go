@@ -36,15 +36,23 @@ const (
 	// SchoolCalendarServiceGetEventsProcedure is the fully-qualified name of the
 	// SchoolCalendarService's GetEvents RPC.
 	SchoolCalendarServiceGetEventsProcedure = "/schoolcalendar.v1.SchoolCalendarService/GetEvents"
+	// SchoolCalendarServiceGetEventsByDateProcedure is the fully-qualified name of the
+	// SchoolCalendarService's GetEventsByDate RPC.
+	SchoolCalendarServiceGetEventsByDateProcedure = "/schoolcalendar.v1.SchoolCalendarService/GetEventsByDate"
 	// SchoolCalendarServiceGetModuleDetailsProcedure is the fully-qualified name of the
 	// SchoolCalendarService's GetModuleDetails RPC.
 	SchoolCalendarServiceGetModuleDetailsProcedure = "/schoolcalendar.v1.SchoolCalendarService/GetModuleDetails"
+	// SchoolCalendarServiceGetModuleByDateProcedure is the fully-qualified name of the
+	// SchoolCalendarService's GetModuleByDate RPC.
+	SchoolCalendarServiceGetModuleByDateProcedure = "/schoolcalendar.v1.SchoolCalendarService/GetModuleByDate"
 )
 
 // SchoolCalendarServiceClient is a client for the schoolcalendar.v1.SchoolCalendarService service.
 type SchoolCalendarServiceClient interface {
 	GetEvents(context.Context, *connect_go.Request[v1.GetEventsRequest]) (*connect_go.Response[v1.GetEventsResponse], error)
+	GetEventsByDate(context.Context, *connect_go.Request[v1.GetEventsByDateRequest]) (*connect_go.Response[v1.GetEventsByDateResponse], error)
 	GetModuleDetails(context.Context, *connect_go.Request[v1.GetModuleDetailsRequest]) (*connect_go.Response[v1.GetModuleDetailsResponse], error)
+	GetModuleByDate(context.Context, *connect_go.Request[v1.GetModuleByDateRequest]) (*connect_go.Response[v1.GetModuleByDateResponse], error)
 }
 
 // NewSchoolCalendarServiceClient constructs a client for the
@@ -63,9 +71,21 @@ func NewSchoolCalendarServiceClient(httpClient connect_go.HTTPClient, baseURL st
 			connect_go.WithIdempotency(connect_go.IdempotencyNoSideEffects),
 			connect_go.WithClientOptions(opts...),
 		),
+		getEventsByDate: connect_go.NewClient[v1.GetEventsByDateRequest, v1.GetEventsByDateResponse](
+			httpClient,
+			baseURL+SchoolCalendarServiceGetEventsByDateProcedure,
+			connect_go.WithIdempotency(connect_go.IdempotencyNoSideEffects),
+			connect_go.WithClientOptions(opts...),
+		),
 		getModuleDetails: connect_go.NewClient[v1.GetModuleDetailsRequest, v1.GetModuleDetailsResponse](
 			httpClient,
 			baseURL+SchoolCalendarServiceGetModuleDetailsProcedure,
+			connect_go.WithIdempotency(connect_go.IdempotencyNoSideEffects),
+			connect_go.WithClientOptions(opts...),
+		),
+		getModuleByDate: connect_go.NewClient[v1.GetModuleByDateRequest, v1.GetModuleByDateResponse](
+			httpClient,
+			baseURL+SchoolCalendarServiceGetModuleByDateProcedure,
 			connect_go.WithIdempotency(connect_go.IdempotencyNoSideEffects),
 			connect_go.WithClientOptions(opts...),
 		),
@@ -75,7 +95,9 @@ func NewSchoolCalendarServiceClient(httpClient connect_go.HTTPClient, baseURL st
 // schoolCalendarServiceClient implements SchoolCalendarServiceClient.
 type schoolCalendarServiceClient struct {
 	getEvents        *connect_go.Client[v1.GetEventsRequest, v1.GetEventsResponse]
+	getEventsByDate  *connect_go.Client[v1.GetEventsByDateRequest, v1.GetEventsByDateResponse]
 	getModuleDetails *connect_go.Client[v1.GetModuleDetailsRequest, v1.GetModuleDetailsResponse]
+	getModuleByDate  *connect_go.Client[v1.GetModuleByDateRequest, v1.GetModuleByDateResponse]
 }
 
 // GetEvents calls schoolcalendar.v1.SchoolCalendarService.GetEvents.
@@ -83,16 +105,28 @@ func (c *schoolCalendarServiceClient) GetEvents(ctx context.Context, req *connec
 	return c.getEvents.CallUnary(ctx, req)
 }
 
+// GetEventsByDate calls schoolcalendar.v1.SchoolCalendarService.GetEventsByDate.
+func (c *schoolCalendarServiceClient) GetEventsByDate(ctx context.Context, req *connect_go.Request[v1.GetEventsByDateRequest]) (*connect_go.Response[v1.GetEventsByDateResponse], error) {
+	return c.getEventsByDate.CallUnary(ctx, req)
+}
+
 // GetModuleDetails calls schoolcalendar.v1.SchoolCalendarService.GetModuleDetails.
 func (c *schoolCalendarServiceClient) GetModuleDetails(ctx context.Context, req *connect_go.Request[v1.GetModuleDetailsRequest]) (*connect_go.Response[v1.GetModuleDetailsResponse], error) {
 	return c.getModuleDetails.CallUnary(ctx, req)
+}
+
+// GetModuleByDate calls schoolcalendar.v1.SchoolCalendarService.GetModuleByDate.
+func (c *schoolCalendarServiceClient) GetModuleByDate(ctx context.Context, req *connect_go.Request[v1.GetModuleByDateRequest]) (*connect_go.Response[v1.GetModuleByDateResponse], error) {
+	return c.getModuleByDate.CallUnary(ctx, req)
 }
 
 // SchoolCalendarServiceHandler is an implementation of the schoolcalendar.v1.SchoolCalendarService
 // service.
 type SchoolCalendarServiceHandler interface {
 	GetEvents(context.Context, *connect_go.Request[v1.GetEventsRequest]) (*connect_go.Response[v1.GetEventsResponse], error)
+	GetEventsByDate(context.Context, *connect_go.Request[v1.GetEventsByDateRequest]) (*connect_go.Response[v1.GetEventsByDateResponse], error)
 	GetModuleDetails(context.Context, *connect_go.Request[v1.GetModuleDetailsRequest]) (*connect_go.Response[v1.GetModuleDetailsResponse], error)
+	GetModuleByDate(context.Context, *connect_go.Request[v1.GetModuleByDateRequest]) (*connect_go.Response[v1.GetModuleByDateResponse], error)
 }
 
 // NewSchoolCalendarServiceHandler builds an HTTP handler from the service implementation. It
@@ -107,9 +141,21 @@ func NewSchoolCalendarServiceHandler(svc SchoolCalendarServiceHandler, opts ...c
 		connect_go.WithIdempotency(connect_go.IdempotencyNoSideEffects),
 		connect_go.WithHandlerOptions(opts...),
 	)
+	schoolCalendarServiceGetEventsByDateHandler := connect_go.NewUnaryHandler(
+		SchoolCalendarServiceGetEventsByDateProcedure,
+		svc.GetEventsByDate,
+		connect_go.WithIdempotency(connect_go.IdempotencyNoSideEffects),
+		connect_go.WithHandlerOptions(opts...),
+	)
 	schoolCalendarServiceGetModuleDetailsHandler := connect_go.NewUnaryHandler(
 		SchoolCalendarServiceGetModuleDetailsProcedure,
 		svc.GetModuleDetails,
+		connect_go.WithIdempotency(connect_go.IdempotencyNoSideEffects),
+		connect_go.WithHandlerOptions(opts...),
+	)
+	schoolCalendarServiceGetModuleByDateHandler := connect_go.NewUnaryHandler(
+		SchoolCalendarServiceGetModuleByDateProcedure,
+		svc.GetModuleByDate,
 		connect_go.WithIdempotency(connect_go.IdempotencyNoSideEffects),
 		connect_go.WithHandlerOptions(opts...),
 	)
@@ -117,8 +163,12 @@ func NewSchoolCalendarServiceHandler(svc SchoolCalendarServiceHandler, opts ...c
 		switch r.URL.Path {
 		case SchoolCalendarServiceGetEventsProcedure:
 			schoolCalendarServiceGetEventsHandler.ServeHTTP(w, r)
+		case SchoolCalendarServiceGetEventsByDateProcedure:
+			schoolCalendarServiceGetEventsByDateHandler.ServeHTTP(w, r)
 		case SchoolCalendarServiceGetModuleDetailsProcedure:
 			schoolCalendarServiceGetModuleDetailsHandler.ServeHTTP(w, r)
+		case SchoolCalendarServiceGetModuleByDateProcedure:
+			schoolCalendarServiceGetModuleByDateHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -132,6 +182,14 @@ func (UnimplementedSchoolCalendarServiceHandler) GetEvents(context.Context, *con
 	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("schoolcalendar.v1.SchoolCalendarService.GetEvents is not implemented"))
 }
 
+func (UnimplementedSchoolCalendarServiceHandler) GetEventsByDate(context.Context, *connect_go.Request[v1.GetEventsByDateRequest]) (*connect_go.Response[v1.GetEventsByDateResponse], error) {
+	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("schoolcalendar.v1.SchoolCalendarService.GetEventsByDate is not implemented"))
+}
+
 func (UnimplementedSchoolCalendarServiceHandler) GetModuleDetails(context.Context, *connect_go.Request[v1.GetModuleDetailsRequest]) (*connect_go.Response[v1.GetModuleDetailsResponse], error) {
 	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("schoolcalendar.v1.SchoolCalendarService.GetModuleDetails is not implemented"))
+}
+
+func (UnimplementedSchoolCalendarServiceHandler) GetModuleByDate(context.Context, *connect_go.Request[v1.GetModuleByDateRequest]) (*connect_go.Response[v1.GetModuleByDateResponse], error) {
+	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("schoolcalendar.v1.SchoolCalendarService.GetModuleByDate is not implemented"))
 }

@@ -38,8 +38,6 @@ const (
 	// AuthServiceDeleteUserAuthenticationProcedure is the fully-qualified name of the AuthService's
 	// DeleteUserAuthentication RPC.
 	AuthServiceDeleteUserAuthenticationProcedure = "/auth.v1.AuthService/DeleteUserAuthentication"
-	// AuthServiceLogoutProcedure is the fully-qualified name of the AuthService's Logout RPC.
-	AuthServiceLogoutProcedure = "/auth.v1.AuthService/Logout"
 	// AuthServiceDeleteAccountProcedure is the fully-qualified name of the AuthService's DeleteAccount
 	// RPC.
 	AuthServiceDeleteAccountProcedure = "/auth.v1.AuthService/DeleteAccount"
@@ -49,7 +47,6 @@ const (
 type AuthServiceClient interface {
 	GetMe(context.Context, *connect_go.Request[v1.GetMeRequest]) (*connect_go.Response[v1.GetMeResponse], error)
 	DeleteUserAuthentication(context.Context, *connect_go.Request[v1.DeleteUserAuthenticationRequest]) (*connect_go.Response[v1.DeleteUserAuthenticationResponse], error)
-	Logout(context.Context, *connect_go.Request[v1.LogoutRequest]) (*connect_go.Response[v1.LogoutResponse], error)
 	DeleteAccount(context.Context, *connect_go.Request[v1.DeleteAccountRequest]) (*connect_go.Response[v1.DeleteAccountResponse], error)
 }
 
@@ -74,11 +71,6 @@ func NewAuthServiceClient(httpClient connect_go.HTTPClient, baseURL string, opts
 			baseURL+AuthServiceDeleteUserAuthenticationProcedure,
 			opts...,
 		),
-		logout: connect_go.NewClient[v1.LogoutRequest, v1.LogoutResponse](
-			httpClient,
-			baseURL+AuthServiceLogoutProcedure,
-			opts...,
-		),
 		deleteAccount: connect_go.NewClient[v1.DeleteAccountRequest, v1.DeleteAccountResponse](
 			httpClient,
 			baseURL+AuthServiceDeleteAccountProcedure,
@@ -91,7 +83,6 @@ func NewAuthServiceClient(httpClient connect_go.HTTPClient, baseURL string, opts
 type authServiceClient struct {
 	getMe                    *connect_go.Client[v1.GetMeRequest, v1.GetMeResponse]
 	deleteUserAuthentication *connect_go.Client[v1.DeleteUserAuthenticationRequest, v1.DeleteUserAuthenticationResponse]
-	logout                   *connect_go.Client[v1.LogoutRequest, v1.LogoutResponse]
 	deleteAccount            *connect_go.Client[v1.DeleteAccountRequest, v1.DeleteAccountResponse]
 }
 
@@ -105,11 +96,6 @@ func (c *authServiceClient) DeleteUserAuthentication(ctx context.Context, req *c
 	return c.deleteUserAuthentication.CallUnary(ctx, req)
 }
 
-// Logout calls auth.v1.AuthService.Logout.
-func (c *authServiceClient) Logout(ctx context.Context, req *connect_go.Request[v1.LogoutRequest]) (*connect_go.Response[v1.LogoutResponse], error) {
-	return c.logout.CallUnary(ctx, req)
-}
-
 // DeleteAccount calls auth.v1.AuthService.DeleteAccount.
 func (c *authServiceClient) DeleteAccount(ctx context.Context, req *connect_go.Request[v1.DeleteAccountRequest]) (*connect_go.Response[v1.DeleteAccountResponse], error) {
 	return c.deleteAccount.CallUnary(ctx, req)
@@ -119,7 +105,6 @@ func (c *authServiceClient) DeleteAccount(ctx context.Context, req *connect_go.R
 type AuthServiceHandler interface {
 	GetMe(context.Context, *connect_go.Request[v1.GetMeRequest]) (*connect_go.Response[v1.GetMeResponse], error)
 	DeleteUserAuthentication(context.Context, *connect_go.Request[v1.DeleteUserAuthenticationRequest]) (*connect_go.Response[v1.DeleteUserAuthenticationResponse], error)
-	Logout(context.Context, *connect_go.Request[v1.LogoutRequest]) (*connect_go.Response[v1.LogoutResponse], error)
 	DeleteAccount(context.Context, *connect_go.Request[v1.DeleteAccountRequest]) (*connect_go.Response[v1.DeleteAccountResponse], error)
 }
 
@@ -140,11 +125,6 @@ func NewAuthServiceHandler(svc AuthServiceHandler, opts ...connect_go.HandlerOpt
 		svc.DeleteUserAuthentication,
 		opts...,
 	)
-	authServiceLogoutHandler := connect_go.NewUnaryHandler(
-		AuthServiceLogoutProcedure,
-		svc.Logout,
-		opts...,
-	)
 	authServiceDeleteAccountHandler := connect_go.NewUnaryHandler(
 		AuthServiceDeleteAccountProcedure,
 		svc.DeleteAccount,
@@ -156,8 +136,6 @@ func NewAuthServiceHandler(svc AuthServiceHandler, opts ...connect_go.HandlerOpt
 			authServiceGetMeHandler.ServeHTTP(w, r)
 		case AuthServiceDeleteUserAuthenticationProcedure:
 			authServiceDeleteUserAuthenticationHandler.ServeHTTP(w, r)
-		case AuthServiceLogoutProcedure:
-			authServiceLogoutHandler.ServeHTTP(w, r)
 		case AuthServiceDeleteAccountProcedure:
 			authServiceDeleteAccountHandler.ServeHTTP(w, r)
 		default:
@@ -175,10 +153,6 @@ func (UnimplementedAuthServiceHandler) GetMe(context.Context, *connect_go.Reques
 
 func (UnimplementedAuthServiceHandler) DeleteUserAuthentication(context.Context, *connect_go.Request[v1.DeleteUserAuthenticationRequest]) (*connect_go.Response[v1.DeleteUserAuthenticationResponse], error) {
 	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("auth.v1.AuthService.DeleteUserAuthentication is not implemented"))
-}
-
-func (UnimplementedAuthServiceHandler) Logout(context.Context, *connect_go.Request[v1.LogoutRequest]) (*connect_go.Response[v1.LogoutResponse], error) {
-	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("auth.v1.AuthService.Logout is not implemented"))
 }
 
 func (UnimplementedAuthServiceHandler) DeleteAccount(context.Context, *connect_go.Request[v1.DeleteAccountRequest]) (*connect_go.Response[v1.DeleteAccountResponse], error) {

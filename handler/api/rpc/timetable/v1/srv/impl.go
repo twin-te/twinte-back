@@ -21,7 +21,7 @@ type impl struct {
 	uc timetablemodule.UseCase
 }
 
-func (svc *impl) GetCourses(ctx context.Context, req *connect.Request[timetablev1.GetCoursesRequest]) (res *connect.Response[timetablev1.GetCoursesResponse], err error) {
+func (svc *impl) GetCoursesByCodes(ctx context.Context, req *connect.Request[timetablev1.GetCoursesByCodesRequest]) (res *connect.Response[timetablev1.GetCoursesByCodesResponse], err error) {
 	year, err := sharedconv.FromPBAcadimicYear(req.Msg.Year)
 	if err != nil {
 		return
@@ -42,7 +42,54 @@ func (svc *impl) GetCourses(ctx context.Context, req *connect.Request[timetablev
 		return
 	}
 
-	res = connect.NewResponse(&timetablev1.GetCoursesResponse{
+	res = connect.NewResponse(&timetablev1.GetCoursesByCodesResponse{
+		Courses: pbCourses,
+	})
+
+	return
+}
+
+func (svc *impl) SearchCourses(ctx context.Context, req *connect.Request[timetablev1.SearchCoursesRequest]) (res *connect.Response[timetablev1.SearchCoursesResponse], err error) {
+	year, err := sharedconv.FromPBAcadimicYear(req.Msg.Year)
+	if err != nil {
+		return
+	}
+
+	in := timetablemodule.SearchCoursesIn{
+		Year:     year,
+		Keywords: req.Msg.Keywords,
+		CodePrefixes: struct {
+			Included []string
+			Excluded []string
+		}{
+			Included: req.Msg.CodePrefixesIncluded,
+			Excluded: req.Msg.CodePrefixesExcluded,
+		},
+		Limit:  int(req.Msg.Limit),
+		Offset: int(req.Msg.Offset),
+	}
+
+	in.Schedules.FullyIncluded, err = base.MapWithErr(req.Msg.SchedulesFullyIncluded, timetablev1conv.FromPBSchedule)
+	if err != nil {
+		return
+	}
+
+	in.Schedules.PartiallyOverlapped, err = base.MapWithErr(req.Msg.SchedulesPartiallyOverlapped, timetablev1conv.FromPBSchedule)
+	if err != nil {
+		return
+	}
+
+	courses, err := svc.uc.SearchCourses(ctx, in)
+	if err != nil {
+		return
+	}
+
+	pbCourses, err := base.MapWithErr(courses, timetablev1conv.ToPBCourse)
+	if err != nil {
+		return
+	}
+
+	res = connect.NewResponse(&timetablev1.SearchCoursesResponse{
 		Courses: pbCourses,
 	})
 
@@ -335,7 +382,7 @@ func (svc *impl) DeleteTag(ctx context.Context, req *connect.Request[timetablev1
 }
 
 func (svc *impl) RearrangeTags(ctx context.Context, req *connect.Request[timetablev1.RearrangeTagsRequest]) (res *connect.Response[timetablev1.RearrangeTagsResponse], err error) {
-	ids, err := base.MapWithArgAndErr(req.Msg.TagIds, idtype.ParseTagID, sharedconv.FromPBUUID[idtype.TagID])
+	ids, err := base.MapWithArgAndErr(req.Msg.Ids, idtype.ParseTagID, sharedconv.FromPBUUID[idtype.TagID])
 	if err != nil {
 		return
 	}

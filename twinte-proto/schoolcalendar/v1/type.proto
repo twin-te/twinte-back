@@ -5,17 +5,6 @@ import "shared/type.proto";
 
 option go_package = "github.com/twin-te/twinte-back/handler/api/rpcgen/schoolcalendar/v1;schoolcalendarv1";
 
-enum Weekday {
-  WEEKDAY_UNSPECIFIED = 0;
-  WEEKDAY_SUNDAY = 1;
-  WEEKDAY_MONDAY = 2;
-  WEEKDAY_TUESDAY = 3;
-  WEEKDAY_WEDNESDAY = 4;
-  WEEKDAY_THURSDAY = 5;
-  WEEKDAY_FRIDAY = 6;
-  WEEKDAY_SATURDAY = 7;
-}
-
 enum EventType {
   EVENT_TYPE_UNSPECIFIED = 0;
   EVENT_TYPE_HOLIDAY = 1;
@@ -43,7 +32,7 @@ message Event {
   EventType type = 2;
   shared.RFC3339FullDate date = 3;
   string description = 4;
-  optional Weekday change_to = 5;
+  optional shared.Weekday change_to = 5;
 }
 
 message ModuleDetail {

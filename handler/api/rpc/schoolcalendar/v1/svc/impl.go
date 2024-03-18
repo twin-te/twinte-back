@@ -41,6 +41,29 @@ func (svc *impl) GetEvents(ctx context.Context, req *connect.Request[schoolcalen
 	return
 }
 
+func (svc *impl) GetEventsByDate(ctx context.Context, req *connect.Request[schoolcalendarv1.GetEventsByDateRequest]) (res *connect.Response[schoolcalendarv1.GetEventsByDateResponse], err error) {
+	date, err := sharedconv.FromPBRFC3339FullDate(req.Msg.Date)
+	if err != nil {
+		return
+	}
+
+	events, err := svc.uc.GetEventsByDate(ctx, date)
+	if err != nil {
+		return
+	}
+
+	pbEvents, err := base.MapWithErr(events, schoolcalendarv1conv.ToPBEvent)
+	if err != nil {
+		return
+	}
+
+	res = connect.NewResponse(&schoolcalendarv1.GetEventsByDateResponse{
+		Events: pbEvents,
+	})
+
+	return
+}
+
 func (svc *impl) GetModuleDetails(ctx context.Context, req *connect.Request[schoolcalendarv1.GetModuleDetailsRequest]) (res *connect.Response[schoolcalendarv1.GetModuleDetailsResponse], err error) {
 	year, err := sharedconv.FromPBAcadimicYear(req.Msg.Year)
 	if err != nil {
@@ -59,6 +82,29 @@ func (svc *impl) GetModuleDetails(ctx context.Context, req *connect.Request[scho
 
 	res = connect.NewResponse(&schoolcalendarv1.GetModuleDetailsResponse{
 		ModuleDetails: pbModuleDetails,
+	})
+
+	return
+}
+
+func (svc *impl) GetModuleByDate(ctx context.Context, req *connect.Request[schoolcalendarv1.GetModuleByDateRequest]) (res *connect.Response[schoolcalendarv1.GetModuleByDateResponse], err error) {
+	date, err := sharedconv.FromPBRFC3339FullDate(req.Msg.Date)
+	if err != nil {
+		return
+	}
+
+	module, err := svc.uc.GetModuleByDate(ctx, date)
+	if err != nil {
+		return
+	}
+
+	pbModule, err := schoolcalendarv1conv.ToPBModule(module)
+	if err != nil {
+		return
+	}
+
+	res = connect.NewResponse(&schoolcalendarv1.GetModuleByDateResponse{
+		Module: pbModule,
 	})
 
 	return

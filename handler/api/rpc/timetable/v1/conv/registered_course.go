@@ -14,7 +14,9 @@ func ToPBRegisteredCourse(registeredCourse *timetabledomain.RegisteredCourse) (p
 		Id:          sharedconv.ToPBUUID(registeredCourse.ID),
 		UserId:      sharedconv.ToPBUUID(registeredCourse.UserID),
 		Year:        sharedconv.ToPBAcademicYear(registeredCourse.Year),
-		Instructors: registeredCourse.Instructors,
+		Name:        registeredCourse.GetName().String(),
+		Instructors: registeredCourse.GetInstructors(),
+		Credit:      registeredCourse.GetCredit().String(),
 		Memo:        registeredCourse.Memo,
 		Attendance:  int32(registeredCourse.Attendance),
 		Absence:     int32(registeredCourse.Absence),
@@ -22,34 +24,18 @@ func ToPBRegisteredCourse(registeredCourse *timetabledomain.RegisteredCourse) (p
 		TagIds:      base.Map(registeredCourse.TagIDs, sharedconv.ToPBUUID[idtype.TagID]),
 	}
 
-	if registeredCourse.CourseID != nil {
-		pbRegisteredCourse.CourseId = sharedconv.ToPBUUID(*registeredCourse.CourseID)
+	if course, ok := registeredCourse.CourseAssociation.Get(); ok {
+		pbRegisteredCourse.Code = lo.ToPtr(course.Code.String())
 	}
 
-	if registeredCourse.Name != nil {
-		pbRegisteredCourse.Name = lo.ToPtr(registeredCourse.Name.String())
+	pbRegisteredCourse.Methods, err = base.MapWithErr(registeredCourse.GetMethods(), ToPBCourseMethod)
+	if err != nil {
+		return
 	}
 
-	if registeredCourse.Credit != nil {
-		pbRegisteredCourse.Credit = lo.ToPtr(registeredCourse.Credit.String())
-	}
-
-	if registeredCourse.Methods != nil {
-		courseMethodList := new(timetablev1.CourseMethodList)
-		courseMethodList.Values, err = base.MapWithErr(*registeredCourse.Methods, ToPBCourseMethod)
-		if err != nil {
-			return
-		}
-		pbRegisteredCourse.Methods = courseMethodList
-	}
-
-	if registeredCourse.Schedules != nil {
-		scheduleList := new(timetablev1.ScheduleList)
-		scheduleList.Values, err = base.MapWithErr(*registeredCourse.Schedules, ToPBSchedule)
-		if err != nil {
-			return
-		}
-		pbRegisteredCourse.Schedules = scheduleList
+	pbRegisteredCourse.Schedules, err = base.MapWithErr(registeredCourse.GetSchedules(), ToPBSchedule)
+	if err != nil {
+		return
 	}
 
 	return

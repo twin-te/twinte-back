@@ -2,6 +2,7 @@ package sharedconv
 
 import (
 	"errors"
+	"fmt"
 	"time"
 
 	"cloud.google.com/go/civil"
@@ -53,4 +54,44 @@ func FromPBRFC3339FullDate(pbFullDate *sharedpb.RFC3339FullDate) (civil.Date, er
 
 func ToPBRFC3339FullDate(cd civil.Date) *sharedpb.RFC3339FullDate {
 	return &sharedpb.RFC3339FullDate{Value: cd.String()}
+}
+
+func FromPBWeekday(pbWeekday sharedpb.Weekday) (time.Weekday, error) {
+	switch pbWeekday {
+	case sharedpb.Weekday_WEEKDAY_SUNDAY:
+		return time.Sunday, nil
+	case sharedpb.Weekday_WEEKDAY_MONDAY:
+		return time.Monday, nil
+	case sharedpb.Weekday_WEEKDAY_TUESDAY:
+		return time.Tuesday, nil
+	case sharedpb.Weekday_WEEKDAY_WEDNESDAY:
+		return time.Wednesday, nil
+	case sharedpb.Weekday_WEEKDAY_THURSDAY:
+		return time.Thursday, nil
+	case sharedpb.Weekday_WEEKDAY_FRIDAY:
+		return time.Friday, nil
+	case sharedpb.Weekday_WEEKDAY_SATURDAY:
+		return time.Saturday, nil
+	}
+	return 0, fmt.Errorf("invalid %#v", pbWeekday)
+}
+
+func ToPBWeekday(weekday time.Weekday) (sharedpb.Weekday, error) {
+	switch weekday {
+	case time.Sunday:
+		return sharedpb.Weekday_WEEKDAY_SUNDAY, nil
+	case time.Monday:
+		return sharedpb.Weekday_WEEKDAY_MONDAY, nil
+	case time.Tuesday:
+		return sharedpb.Weekday_WEEKDAY_TUESDAY, nil
+	case time.Wednesday:
+		return sharedpb.Weekday_WEEKDAY_WEDNESDAY, nil
+	case time.Thursday:
+		return sharedpb.Weekday_WEEKDAY_THURSDAY, nil
+	case time.Friday:
+		return sharedpb.Weekday_WEEKDAY_FRIDAY, nil
+	case time.Saturday:
+		return sharedpb.Weekday_WEEKDAY_SATURDAY, nil
+	}
+	return 0, fmt.Errorf("invalid %#v", weekday)
 }

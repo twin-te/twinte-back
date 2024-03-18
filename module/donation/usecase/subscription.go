@@ -7,8 +7,8 @@ import (
 	"github.com/samber/lo"
 	"github.com/twin-te/twinte-back/apperr"
 	donationdomain "github.com/twin-te/twinte-back/module/donation/domain"
+	donationerr "github.com/twin-te/twinte-back/module/donation/err"
 	"github.com/twin-te/twinte-back/module/shared/domain/idtype"
-	sharederr "github.com/twin-te/twinte-back/module/shared/err"
 )
 
 func (uc *impl) GetSubscriptions(ctx context.Context) ([]*donationdomain.Subscription, error) {
@@ -39,7 +39,7 @@ func (uc *impl) Unsubscribe(ctx context.Context, id idtype.SubscriptionID) error
 	if !lo.ContainsBy(subscriptions, func(item *donationdomain.Subscription) bool {
 		return item.ID == id
 	}) {
-		return apperr.New(sharederr.CodeNotFound, fmt.Sprintf("not found subscription whose id is %s", id))
+		return apperr.New(donationerr.CodeSubscriptionNotFound, fmt.Sprintf("not found subscription whose id is %s", id))
 	}
 
 	return uc.g.DeleteSubscription(ctx, id)

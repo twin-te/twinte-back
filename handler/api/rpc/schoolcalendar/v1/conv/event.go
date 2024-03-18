@@ -20,7 +20,7 @@ func ToPBEvent(event *schoolcalendardomain.Event) (*schoolcalendarv1.Event, erro
 	}
 
 	if event.ChangeTo != nil {
-		pbWeekday, err := ToPBWeekday(*event.ChangeTo)
+		pbWeekday, err := sharedconv.ToPBWeekday(*event.ChangeTo)
 		if err != nil {
 			return nil, err
 		}

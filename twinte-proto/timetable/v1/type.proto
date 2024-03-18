@@ -71,16 +71,17 @@ message Course {
   bool is_annual = 14;
 }
 
+// If it has the based course, code is present.
 message RegisteredCourse {
   shared.UUID id = 1;
   shared.UUID user_id = 2;
   shared.AcademicYear year = 3;
-  optional shared.UUID course_id = 4;
-  optional string name = 5;
-  optional string instructors = 6;
-  optional string credit = 7;
-  optional CourseMethodList methods = 8;
-  optional ScheduleList schedules = 9;
+  optional string code = 4;
+  string name = 5;
+  string instructors = 6;
+  string credit = 7;
+  repeated CourseMethod methods = 8;
+  repeated Schedule schedules = 9;
   string memo = 10;
   int32 attendance = 11;
   int32 absence = 12;

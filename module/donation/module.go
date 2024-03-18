@@ -9,7 +9,10 @@ import (
 
 // UseCase represents application specific business rules.
 //
-// The error codes for authentication and authorization failures are not stated explicitly.
+// The following error codes are not stated explicitly in the each method, but may be returned.
+//   - shared.InvalidArgument
+//   - shared.Unauthenticated
+//   - shared.Unauthorized
 type UseCase interface {
 	// CreateOneTimeCheckoutSession
 	//
@@ -46,7 +49,7 @@ type UseCase interface {
 	// [Authentication] required
 	//
 	// [Error Code]
-	//   - shared.NotFound
+	//   - donation.SubscriptionNotFound
 	Unsubscribe(ctx context.Context, id idtype.SubscriptionID) error
 
 	// GetTotalAmount

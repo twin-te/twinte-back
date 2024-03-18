@@ -7,6 +7,11 @@ import (
 	authmodule "github.com/twin-te/twinte-back/module/auth"
 )
 
+// impl handles the requests with the following paths.
+//   - "/:provider"
+//   - "/:provider/callback"
+//   - "/logout"
+//   - "/google/idToken"
 type impl struct {
 	accessController authmodule.AccessController
 	authUseCase      authmodule.UseCase

@@ -38,23 +38,6 @@ func (svc *impl) GetMe(ctx context.Context, req *connect.Request[authv1.GetMeReq
 	return
 }
 
-func (svc *impl) Logout(ctx context.Context, req *connect.Request[authv1.LogoutRequest]) (res *connect.Response[authv1.LogoutResponse], err error) {
-	if err = svc.uc.Logout(ctx); err != nil {
-		return
-	}
-
-	res = connect.NewResponse(&authv1.LogoutResponse{})
-	cookie := http.Cookie{
-		Name:     appenv.COOKIE_SESSION_NAME,
-		MaxAge:   -1,
-		Secure:   appenv.COOKIE_SECURE,
-		HttpOnly: true,
-	}
-	res.Header().Set("Set-Cookie", cookie.String())
-
-	return
-}
-
 func (svc *impl) DeleteAccount(ctx context.Context, req *connect.Request[authv1.DeleteAccountRequest]) (res *connect.Response[authv1.DeleteAccountResponse], err error) {
 	if err = svc.uc.DeleteAccount(ctx); err != nil {
 		return
@@ -62,10 +45,9 @@ func (svc *impl) DeleteAccount(ctx context.Context, req *connect.Request[authv1.
 
 	res = connect.NewResponse(&authv1.DeleteAccountResponse{})
 	cookie := http.Cookie{
-		Name:     appenv.COOKIE_SESSION_NAME,
-		MaxAge:   -1,
-		Secure:   appenv.COOKIE_SECURE,
-		HttpOnly: true,
+		Name:   appenv.COOKIE_SESSION_NAME,
+		Path:   "/",
+		MaxAge: -1,
 	}
 	res.Header().Set("Set-Cookie", cookie.String())
 

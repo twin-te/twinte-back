@@ -33,14 +33,16 @@ const (
 // reflection-formatted method names, remove the leading slash and convert the remaining slash to a
 // period.
 const (
-	// UnifiedServiceGetForFrontProcedure is the fully-qualified name of the UnifiedService's
-	// GetForFront RPC.
-	UnifiedServiceGetForFrontProcedure = "/unified.v1.UnifiedService/GetForFront"
+	// UnifiedServiceGetByDateProcedure is the fully-qualified name of the UnifiedService's GetByDate
+	// RPC.
+	UnifiedServiceGetByDateProcedure = "/unified.v1.UnifiedService/GetByDate"
 )
 
 // UnifiedServiceClient is a client for the unified.v1.UnifiedService service.
 type UnifiedServiceClient interface {
-	GetForFront(context.Context, *connect_go.Request[v1.GetForFrontRequest]) (*connect_go.Response[v1.GetForFrontResponse], error)
+	// GetByDate returns the resources related to the given date.
+	// Only registered courses which will be held on the given date will be returned.
+	GetByDate(context.Context, *connect_go.Request[v1.GetByDateRequest]) (*connect_go.Response[v1.GetByDateResponse], error)
 }
 
 // NewUnifiedServiceClient constructs a client for the unified.v1.UnifiedService service. By
@@ -53,9 +55,9 @@ type UnifiedServiceClient interface {
 func NewUnifiedServiceClient(httpClient connect_go.HTTPClient, baseURL string, opts ...connect_go.ClientOption) UnifiedServiceClient {
 	baseURL = strings.TrimRight(baseURL, "/")
 	return &unifiedServiceClient{
-		getForFront: connect_go.NewClient[v1.GetForFrontRequest, v1.GetForFrontResponse](
+		getByDate: connect_go.NewClient[v1.GetByDateRequest, v1.GetByDateResponse](
 			httpClient,
-			baseURL+UnifiedServiceGetForFrontProcedure,
+			baseURL+UnifiedServiceGetByDateProcedure,
 			connect_go.WithIdempotency(connect_go.IdempotencyNoSideEffects),
 			connect_go.WithClientOptions(opts...),
 		),
@@ -64,17 +66,19 @@ func NewUnifiedServiceClient(httpClient connect_go.HTTPClient, baseURL string, o
 
 // unifiedServiceClient implements UnifiedServiceClient.
 type unifiedServiceClient struct {
-	getForFront *connect_go.Client[v1.GetForFrontRequest, v1.GetForFrontResponse]
+	getByDate *connect_go.Client[v1.GetByDateRequest, v1.GetByDateResponse]
 }
 
-// GetForFront calls unified.v1.UnifiedService.GetForFront.
-func (c *unifiedServiceClient) GetForFront(ctx context.Context, req *connect_go.Request[v1.GetForFrontRequest]) (*connect_go.Response[v1.GetForFrontResponse], error) {
-	return c.getForFront.CallUnary(ctx, req)
+// GetByDate calls unified.v1.UnifiedService.GetByDate.
+func (c *unifiedServiceClient) GetByDate(ctx context.Context, req *connect_go.Request[v1.GetByDateRequest]) (*connect_go.Response[v1.GetByDateResponse], error) {
+	return c.getByDate.CallUnary(ctx, req)
 }
 
 // UnifiedServiceHandler is an implementation of the unified.v1.UnifiedService service.
 type UnifiedServiceHandler interface {
-	GetForFront(context.Context, *connect_go.Request[v1.GetForFrontRequest]) (*connect_go.Response[v1.GetForFrontResponse], error)
+	// GetByDate returns the resources related to the given date.
+	// Only registered courses which will be held on the given date will be returned.
+	GetByDate(context.Context, *connect_go.Request[v1.GetByDateRequest]) (*connect_go.Response[v1.GetByDateResponse], error)
 }
 
 // NewUnifiedServiceHandler builds an HTTP handler from the service implementation. It returns the
@@ -83,16 +87,16 @@ type UnifiedServiceHandler interface {
 // By default, handlers support the Connect, gRPC, and gRPC-Web protocols with the binary Protobuf
 // and JSON codecs. They also support gzip compression.
 func NewUnifiedServiceHandler(svc UnifiedServiceHandler, opts ...connect_go.HandlerOption) (string, http.Handler) {
-	unifiedServiceGetForFrontHandler := connect_go.NewUnaryHandler(
-		UnifiedServiceGetForFrontProcedure,
-		svc.GetForFront,
+	unifiedServiceGetByDateHandler := connect_go.NewUnaryHandler(
+		UnifiedServiceGetByDateProcedure,
+		svc.GetByDate,
 		connect_go.WithIdempotency(connect_go.IdempotencyNoSideEffects),
 		connect_go.WithHandlerOptions(opts...),
 	)
 	return "/unified.v1.UnifiedService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
-		case UnifiedServiceGetForFrontProcedure:
-			unifiedServiceGetForFrontHandler.ServeHTTP(w, r)
+		case UnifiedServiceGetByDateProcedure:
+			unifiedServiceGetByDateHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -102,6 +106,6 @@ func NewUnifiedServiceHandler(svc UnifiedServiceHandler, opts ...connect_go.Hand
 // UnimplementedUnifiedServiceHandler returns CodeUnimplemented from all methods.
 type UnimplementedUnifiedServiceHandler struct{}
 
-func (UnimplementedUnifiedServiceHandler) GetForFront(context.Context, *connect_go.Request[v1.GetForFrontRequest]) (*connect_go.Response[v1.GetForFrontResponse], error) {
-	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("unified.v1.UnifiedService.GetForFront is not implemented"))
+func (UnimplementedUnifiedServiceHandler) GetByDate(context.Context, *connect_go.Request[v1.GetByDateRequest]) (*connect_go.Response[v1.GetByDateResponse], error) {
+	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("unified.v1.UnifiedService.GetByDate is not implemented"))
 }

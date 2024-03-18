@@ -15,10 +15,23 @@ message UUIDList {
   repeated UUID values = 1;
 }
 
+// e.g. 2006-01-02
 message RFC3339FullDate {
   string value = 1;
 }
 
+// e.g. 2006-01-02T15:04:05+09:00
 message RFC3339DateTime {
   string value = 1;
+}
+
+enum Weekday {
+  WEEKDAY_UNSPECIFIED = 0;
+  WEEKDAY_SUNDAY = 1;
+  WEEKDAY_MONDAY = 2;
+  WEEKDAY_TUESDAY = 3;
+  WEEKDAY_WEDNESDAY = 4;
+  WEEKDAY_THURSDAY = 5;
+  WEEKDAY_FRIDAY = 6;
+  WEEKDAY_SATURDAY = 7;
 }

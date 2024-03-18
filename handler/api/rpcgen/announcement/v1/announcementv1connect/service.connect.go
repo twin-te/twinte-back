@@ -46,7 +46,6 @@ const (
 
 // AnnouncementServiceClient is a client for the announcement.v1.AnnouncementService service.
 type AnnouncementServiceClient interface {
-	// PermissionPublic
 	GetAnnouncements(context.Context, *connect_go.Request[v1.GetAnnouncementsRequest]) (*connect_go.Response[v1.GetAnnouncementsResponse], error)
 	GetReadFlags(context.Context, *connect_go.Request[v1.GetReadFlagsRequest]) (*connect_go.Response[v1.GetReadFlagsResponse], error)
 	UpdateReadFlag(context.Context, *connect_go.Request[v1.UpdateReadFlagRequest]) (*connect_go.Response[v1.UpdateReadFlagResponse], error)
@@ -107,7 +106,6 @@ func (c *announcementServiceClient) UpdateReadFlag(ctx context.Context, req *con
 // AnnouncementServiceHandler is an implementation of the announcement.v1.AnnouncementService
 // service.
 type AnnouncementServiceHandler interface {
-	// PermissionPublic
 	GetAnnouncements(context.Context, *connect_go.Request[v1.GetAnnouncementsRequest]) (*connect_go.Response[v1.GetAnnouncementsResponse], error)
 	GetReadFlags(context.Context, *connect_go.Request[v1.GetReadFlagsRequest]) (*connect_go.Response[v1.GetReadFlagsResponse], error)
 	UpdateReadFlag(context.Context, *connect_go.Request[v1.UpdateReadFlagRequest]) (*connect_go.Response[v1.UpdateReadFlagResponse], error)
